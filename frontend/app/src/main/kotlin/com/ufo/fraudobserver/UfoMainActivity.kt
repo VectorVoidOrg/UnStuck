@@ -47,7 +47,7 @@ class UfoMainActivity : ComponentActivity() {
                     }
                 }
 
-                val startDestination = if (isCriticalGranted.value) "dashboard" else "onboarding"
+                val startDestination = "dashboard"
 
                 NavHost(
                     navController = navController,

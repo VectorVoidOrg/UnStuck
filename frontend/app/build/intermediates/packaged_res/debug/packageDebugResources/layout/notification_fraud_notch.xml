@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/notch_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_crimson_notch"
+    android:paddingHorizontal="12dp"
+    android:paddingVertical="9dp">
+
+    <!-- Top Micro-Bar: Truecaller-style caller/message ID header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/notch_header"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="UFO UPI GUARD • GOOGLE PAY"
+            android:textColor="#94A3B8"
+            android:textSize="10sp"
+            android:letterSpacing="0.06"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/notch_risk_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_risk_badge"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:text="RISK 95/100"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Main Compact Row: Receiver + VPA + Reason on left, Amount + Quick Actions on right -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/notch_vpa"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Flipkart Refund (flipkart.refund@okaxis)"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/notch_reason"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Collect request trap • Blacklisted Fraud ID"
+                android:textColor="#CBD5E1"
+                android:textSize="11sp"
+                android:singleLine="true"
+                android:ellipsize="end" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/notch_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="₹4,999"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Ultra-Compact Truecaller Action Strip -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal"
+        android:gravity="end|center_vertical">
+
+        <TextView
+            android:id="@+id/btn_dismiss_notch"
+            android:layout_width="wrap_content"
+            android:layout_height="26dp"
+            android:gravity="center"
+            android:background="@drawable/btn_dismiss_bg"
+            android:text="Dismiss"
+            android:textColor="#CBD5E1"
+            android:textSize="10.5sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="10dp" />
+
+        <TextView
+            android:id="@+id/btn_abort_payment"
+            android:layout_width="wrap_content"
+            android:layout_height="26dp"
+            android:gravity="center"
+            android:layout_marginStart="6dp"
+            android:background="@drawable/btn_abort_bg"
+            android:text="Inspect in UFO"
+            android:textColor="#FFFFFF"
+            android:textSize="10.5sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="12dp" />
+    </LinearLayout>
+
+</LinearLayout>
