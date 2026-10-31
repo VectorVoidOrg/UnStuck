@@ -1,0 +1,22 @@
+{
+  "bias": -4.8776,
+  "w_amount_log": -1.0276,
+  "w_high_amount": 2.6882,
+  "w_fast_action": 1.988,
+  "w_unusual_time": 1.5585,
+  "w_new_receiver": 2.7294,
+  "w_interaction_new_high_fast": 0.811,
+  "w_screen_share": 3.8292,
+  "w_active_call": 2.6496,
+  "w_collect_req": 2.8606,
+  "w_copy_pasted": 1.3112,
+  "w_device_changed": 1.1586,
+  "metrics": {
+    "accuracy": 0.9371,
+    "precision": 0.7705,
+    "recall": 0.8715,
+    "f1_score": 0.8179,
+    "train_samples": 9600,
+    "test_samples": 2400
+  }
+}
