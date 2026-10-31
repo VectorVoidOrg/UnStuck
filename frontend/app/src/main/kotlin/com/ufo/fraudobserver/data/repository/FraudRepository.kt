@@ -33,6 +33,21 @@ class FraudRepository(
     val totalThreatCount: Flow<Int> =
         database.flaggedTransactionDao().getCountFlow()
 
+    suspend fun cleanLegacySeededDataIfNeeded() = withContext(Dispatchers.IO) {
+        val prefs = context.getSharedPreferences("ufo_sync_prefs", Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("legacy_demo_activity_cleared", false)) {
+            database.flaggedTransactionDao().clearAll()
+            prefs.edit()
+                .putBoolean("legacy_demo_activity_cleared", true)
+                .remove("initial_activity_seeded")
+                .apply()
+        }
+    }
+
+    suspend fun deleteTransaction(id: Long) = withContext(Dispatchers.IO) {
+        database.flaggedTransactionDao().deleteById(id)
+    }
+
     suspend fun recordFlaggedTransaction(
         vpa: String,
         payeeName: String?,

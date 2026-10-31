@@ -4,5 +4,8 @@
     <string name="channel_critical_alerts">Critical Fraud Alerts</string>
     <string name="channel_critical_alerts_desc">High-priority heads-up alerts intercepted prior to UPI PIN entry</string>
     <string name="accessibility_service_description">UFO observes active UPI payment screens to evaluate payee risk and detect brand spoofing or collect traps before PIN entry.</string>
+    <string name="unstuck_feature_title">Unstuck</string>
+    <string name="unstuck_feature_subtitle">Statutory TAT &amp; RBI Compensation Assistant</string>
+    <string name="unstuck_tab_label">Unstuck</string>
 </resources>
 

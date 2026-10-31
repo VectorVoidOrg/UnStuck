@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ufo.fraudobserver.data.repository.FraudRepository
+import com.ufo.fraudobserver.feature.unstuck.ui.UnstuckRoute
 import com.ufo.fraudobserver.ui.alert.FraudAlertDetailScreen
 import com.ufo.fraudobserver.ui.dashboard.DashboardScreen
 import com.ufo.fraudobserver.ui.dashboard.DashboardViewModel
@@ -47,7 +48,7 @@ class UfoMainActivity : ComponentActivity() {
                     }
                 }
 
-                val startDestination = if (isCriticalGranted.value) "dashboard" else "onboarding"
+                val startDestination = "dashboard"
 
                 NavHost(
                     navController = navController,
@@ -122,6 +123,12 @@ class UfoMainActivity : ComponentActivity() {
                     composable("whitelist") {
                         WhitelistScreen(
                             onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+
+                    composable("unstuck") {
+                        UnstuckRoute(
+                            onNavigateBackToHome = { navController.popBackStack() }
                         )
                     }
                 }

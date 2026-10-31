@@ -48,6 +48,9 @@ retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-
 # Coroutines
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 
+# Testing
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

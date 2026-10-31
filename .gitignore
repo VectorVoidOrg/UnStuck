@@ -14,13 +14,13 @@ tools/
 *.apk
 *.aab
 local.properties
+**/local.properties
 .gradle/
+**/.gradle/
 build/
-app/build/
-.idea/caches/
-.idea/libraries/
-.idea/modules.xml
-.idea/workspace.xml
+**/build/
+.idea/
+**/.idea/
 
 # Python
 __pycache__/
@@ -28,3 +28,7 @@ __pycache__/
 .venv/
 venv/
 .pytest_cache/
+
+# Merged Archives
+_archive_unstuck_subparted/
+Unstuck_subpart/

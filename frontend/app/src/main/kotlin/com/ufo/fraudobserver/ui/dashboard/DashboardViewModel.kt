@@ -4,11 +4,17 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufo.fraudobserver.data.local.FlaggedTransactionEntity
+import com.ufo.fraudobserver.data.local.WhitelistedVpaEntity
 import com.ufo.fraudobserver.data.repository.FraudRepository
 import com.ufo.fraudobserver.engine.BloomFilterEngine
 import com.ufo.fraudobserver.engine.CallStateMonitor
 import com.ufo.fraudobserver.engine.RiskEvaluationResult
 import com.ufo.fraudobserver.engine.RiskEvaluator
+import com.ufo.fraudobserver.engine.RiskStatus
+import com.ufo.fraudobserver.engine.SessionWhitelist
+import com.ufo.fraudobserver.engine.UfoProtectionPrefs
+import com.ufo.fraudobserver.intervention.InterventionNotifier
+import com.ufo.fraudobserver.parser.PayloadParser
 import com.ufo.fraudobserver.ui.onboarding.PermissionHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,11 +24,24 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class DashboardUiState(
+    val isBackgroundGuardEnabled: Boolean = true,
     val isAccessibilityActive: Boolean = false,
     val isNotificationListenerActive: Boolean = false,
+    val hasPostNotifications: Boolean = false,
+    val hasPhoneState: Boolean = false,
+    val isBatteryOptimizedIgnored: Boolean = false,
     val isCallMonitorActive: Boolean = false,
     val bloomFilterEntries: Int = 0,
+    // Step 1 & Step 2 flow state
+    val requestText: String = "Flipkart Refund requested ₹4,999. Pay to flipkart.refund@okaxis.",
+    val receiverName: String = "Flipkart Refund",
+    val vpa: String = "flipkart.refund@okaxis",
+    val amountInput: String = "₹ 4,999",
+    val isCollectRequest: Boolean = true,
+    val attachedSource: String = "",
+    // Latest evaluated / selected check
     val simulationResult: RiskEvaluationResult? = null,
+    val activePopupBanner: RiskEvaluationResult? = null,
     val isSimulating: Boolean = false,
     val statusMessage: String? = null
 )
@@ -33,9 +52,17 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     private val bloomFilter = BloomFilterEngine.getInstance(application)
     private val callStateMonitor = CallStateMonitor.getInstance(application)
     private val riskEvaluator = RiskEvaluator.getInstance(application)
+    private val notifier = InterventionNotifier.getInstance(application)
 
     val flaggedTransactions: StateFlow<List<FlaggedTransactionEntity>> =
         repository.flaggedTransactions.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList()
+        )
+
+    val whitelistedVpas: StateFlow<List<WhitelistedVpaEntity>> =
+        repository.whitelistedVpas.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
             emptyList()
@@ -52,23 +79,215 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
     init {
+        UfoProtectionPrefs.init(application)
+        viewModelScope.launch {
+            repository.cleanLegacySeededDataIfNeeded()
+        }
         refreshStatus()
     }
 
     fun refreshStatus() {
         val context = getApplication<Application>()
         _uiState.value = _uiState.value.copy(
+            isBackgroundGuardEnabled = UfoProtectionPrefs.isBackgroundGuardEnabled(context),
             isAccessibilityActive = PermissionHelper.isAccessibilityServiceEnabled(context),
             isNotificationListenerActive = PermissionHelper.isNotificationListenerEnabled(context),
+            hasPostNotifications = PermissionHelper.hasPostNotificationsPermission(context),
+            hasPhoneState = PermissionHelper.hasPhoneStatePermission(context),
+            isBatteryOptimizedIgnored = PermissionHelper.isBatteryOptimizationIgnored(context),
             isCallMonitorActive = callStateMonitor.isCallActive(),
             bloomFilterEntries = bloomFilter.getEstimatedCount()
         )
     }
 
-    /**
-     * Executes instant zero-latency risk simulation on Dispatchers.Default
-     * directly testing all 3 engine layers (Bloom Filter, Heuristic/Typosquatting, Call Telemetry).
-     */
+    fun setBackgroundGuardEnabled(enabled: Boolean) {
+        val context = getApplication<Application>()
+        UfoProtectionPrefs.setBackgroundGuardEnabled(context, enabled)
+        _uiState.value = _uiState.value.copy(
+            isBackgroundGuardEnabled = enabled,
+            statusMessage = if (enabled) {
+                "Background UPI Guard enabled — watching UPI payment screens"
+            } else {
+                "Background UPI Guard paused by user"
+            }
+        )
+    }
+
+    fun dismissPopupBanner() {
+        _uiState.value = _uiState.value.copy(activePopupBanner = null)
+    }
+
+    fun triggerTruecallerPopupPreview() {
+        val current = _uiState.value
+        val vpa = current.vpa.ifBlank { "flipkart.refund@okaxis" }
+        val payee = current.receiverName.ifBlank { "Flipkart Refund" }
+        val amount = current.amountInput
+            .replace("₹", "")
+            .replace(",", "")
+            .trim()
+            .toDoubleOrNull() ?: 4999.0
+        val score = current.simulationResult?.riskScore ?: 95
+        val triggers = current.simulationResult?.triggers ?: listOf(
+            "Refund collect trap",
+            "Blacklisted Fraud ID"
+        )
+        val status = when {
+            score >= 60 -> RiskStatus.FRAUD
+            score >= 30 -> RiskStatus.WARNING
+            else -> RiskStatus.SAFE
+        }
+
+        notifier.showIntervention(
+            vpa = vpa,
+            riskScore = score,
+            primaryTrigger = triggers.firstOrNull() ?: "Evaluated by UFO Guard",
+            secondaryTrigger = triggers.drop(1).firstOrNull(),
+            payeeName = payee,
+            amount = amount,
+            sourceApp = "Google Pay",
+            backendVerified = current.simulationResult?.backendVerified ?: false
+        )
+
+        _uiState.value = _uiState.value.copy(
+            activePopupBanner = RiskEvaluationResult(
+                vpa = vpa,
+                payeeName = payee,
+                amount = amount,
+                riskScore = score,
+                status = status,
+                triggers = triggers,
+                isHardBlocked = score >= 90,
+                latencyMs = 12L,
+                backendVerified = current.simulationResult?.backendVerified ?: false,
+                sourceApp = "Google Pay"
+            )
+        )
+    }
+
+    fun updateRequestText(text: String) {
+        val extractedVpa = PayloadParser.extractVpa(text)
+        val extractedAmount = PayloadParser.extractAmount(text)
+        val isCollect = PayloadParser.isCollectRequest(text)
+
+        val candidateName = text.substringBefore(" requested", missingDelimiterValue = "")
+            .ifBlank {
+                if (extractedVpa != null) {
+                    extractedVpa.substringBefore("@")
+                        .split(".", "-", "_")
+                        .joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
+                } else {
+                    _uiState.value.receiverName
+                }
+            }
+
+        _uiState.value = _uiState.value.copy(
+            requestText = text,
+            vpa = extractedVpa ?: _uiState.value.vpa,
+            amountInput = if (extractedAmount != null) "₹ ${extractedAmount.toInt()}" else _uiState.value.amountInput,
+            receiverName = candidateName,
+            isCollectRequest = isCollect || _uiState.value.isCollectRequest
+        )
+    }
+
+    fun updateAmountInput(amount: String) {
+        _uiState.value = _uiState.value.copy(amountInput = amount)
+    }
+
+    fun updateReceiverName(name: String) {
+        _uiState.value = _uiState.value.copy(receiverName = name)
+    }
+
+    fun updateVpa(vpa: String) {
+        _uiState.value = _uiState.value.copy(vpa = vpa)
+    }
+
+    fun updateCollectRequest(isCollect: Boolean) {
+        _uiState.value = _uiState.value.copy(isCollectRequest = isCollect)
+    }
+
+    fun setAttachment(label: String) {
+        _uiState.value = _uiState.value.copy(attachedSource = label)
+    }
+
+    fun applyQuickPreset(presetName: String, presetVpa: String, presetAmount: String, isCollect: Boolean) {
+        val text = if (isCollect) {
+            "$presetName requested ₹$presetAmount. Pay to $presetVpa."
+        } else {
+            "Sending ₹$presetAmount to $presetName ($presetVpa)."
+        }
+        _uiState.value = _uiState.value.copy(
+            requestText = text,
+            receiverName = presetName,
+            vpa = presetVpa,
+            amountInput = "₹ $presetAmount",
+            isCollectRequest = isCollect
+        )
+    }
+
+    fun evaluateCurrentRequest(onComplete: (RiskEvaluationResult) -> Unit) {
+        val current = _uiState.value
+        val numericAmount = current.amountInput
+            .replace("₹", "")
+            .replace(",", "")
+            .trim()
+            .toDoubleOrNull()
+
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isSimulating = true)
+            val result = riskEvaluator.evaluate(
+                vpa = current.vpa,
+                payeeName = current.receiverName.ifBlank { "Receiver" },
+                amount = numericAmount,
+                isCollectRequest = current.isCollectRequest,
+                contextText = current.requestText,
+                sourceApp = "Google Pay",
+                triggerIntervention = true
+            )
+
+            _uiState.value = _uiState.value.copy(
+                isSimulating = false,
+                simulationResult = result,
+                activePopupBanner = result,
+                statusMessage = "Evaluated in ${result.latencyMs}ms • Score ${result.riskScore}/100"
+            )
+            onComplete(result)
+        }
+    }
+
+    fun selectActivityItem(item: FlaggedTransactionEntity) {
+        val status = when {
+            item.riskScore >= 60 -> RiskStatus.FRAUD
+            item.riskScore >= 30 -> RiskStatus.WARNING
+            else -> RiskStatus.SAFE
+        }
+        val triggers = item.triggerReason.split(" • ").filter { it.isNotBlank() }
+        val result = RiskEvaluationResult(
+            vpa = item.vpa,
+            payeeName = item.payeeName,
+            amount = item.amount,
+            riskScore = item.riskScore,
+            status = status,
+            triggers = triggers.ifEmpty { listOf(item.triggerReason) },
+            isHardBlocked = item.riskScore >= 90,
+            latencyMs = 1L,
+            sourceApp = item.sourceApp
+        )
+        _uiState.value = _uiState.value.copy(
+            receiverName = item.payeeName ?: item.vpa.substringBefore("@"),
+            vpa = item.vpa,
+            amountInput = item.amount?.let { "₹ ${it.toInt()}" } ?: "₹ 0",
+            simulationResult = result
+        )
+    }
+
+    fun dismissWarningForCurrentVpa() {
+        val currentVpa = _uiState.value.vpa
+        if (currentVpa.isNotBlank()) {
+            SessionWhitelist.add(currentVpa)
+        }
+        _uiState.value = _uiState.value.copy(activePopupBanner = null)
+    }
+
     fun simulateRiskCheck(
         vpa: String,
         amount: Double?,
@@ -91,8 +310,28 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             _uiState.value = _uiState.value.copy(
                 isSimulating = false,
                 simulationResult = result,
+                activePopupBanner = result,
                 statusMessage = "Evaluated in ${result.latencyMs}ms -> Risk Score: ${result.riskScore}%"
             )
+        }
+    }
+
+    fun addTrustedVpa(vpa: String) {
+        if (vpa.isBlank()) return
+        viewModelScope.launch {
+            repository.addToWhitelist(vpa.trim().lowercase())
+        }
+    }
+
+    fun removeTrustedVpa(vpa: String) {
+        viewModelScope.launch {
+            repository.removeFromWhitelist(vpa)
+        }
+    }
+
+    fun deleteActivityItem(id: Long) {
+        viewModelScope.launch {
+            repository.deleteTransaction(id)
         }
     }
 
@@ -112,4 +351,3 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 }
-
