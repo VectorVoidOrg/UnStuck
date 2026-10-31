@@ -8,6 +8,7 @@ import android.service.notification.StatusBarNotification
 import android.util.Log
 import android.util.LruCache
 import com.ufo.fraudobserver.engine.RiskEvaluator
+import com.ufo.fraudobserver.engine.UfoProtectionPrefs
 import com.ufo.fraudobserver.parser.PayloadParser
 
 /**
@@ -43,6 +44,7 @@ class UfoNotificationService : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         if (sbn == null) return
+        if (!UfoProtectionPrefs.isBackgroundGuardEnabled(applicationContext)) return
 
         val packageName = sbn.packageName
         if (!TARGET_PACKAGES.contains(packageName)) {

@@ -2,6 +2,8 @@ package com.ufo.fraudobserver.engine
 
 import android.content.Context
 import android.util.Log
+import com.ufo.fraudobserver.data.remote.EvaluateRequest
+import com.ufo.fraudobserver.data.remote.UfoApiService
 import com.ufo.fraudobserver.data.repository.FraudRepository
 import com.ufo.fraudobserver.intervention.InterventionNotifier
 import kotlinx.coroutines.CoroutineScope
@@ -11,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 data class RiskEvaluationResult(
     val vpa: String,
@@ -20,7 +23,9 @@ data class RiskEvaluationResult(
     val status: RiskStatus,
     val triggers: List<String>,
     val isHardBlocked: Boolean,
-    val latencyMs: Long
+    val latencyMs: Long,
+    val backendVerified: Boolean = false,
+    val sourceApp: String? = null
 )
 
 enum class RiskStatus {
@@ -30,8 +35,10 @@ enum class RiskStatus {
 }
 
 /**
- * Module B: Multi-Layered Risk Evaluation Engine
- * Executes with sub-50ms latency on Dispatchers.Default.
+ * Module B: Real-Time Backend + On-Device Risk Evaluation Engine
+ * 1. Sends extracted UPI screen payload (Receiver, VPA, Amount, Source App) to Backend API (/api/v1/evaluate).
+ * 2. Uses Backend Risk Score when reachable; seamlessly falls back to on-device multi-layer engine while backend is under development.
+ * 3. Triggers the Truecaller-sized notification popup with the resulting risk score.
  */
 class RiskEvaluator(
     private val context: Context,
@@ -39,6 +46,7 @@ class RiskEvaluator(
     private val heuristicEngine: HeuristicEngine = HeuristicEngine(),
     private val callStateMonitor: CallStateMonitor = CallStateMonitor.getInstance(context),
     private val repository: FraudRepository = FraudRepository(context),
+    private val apiService: UfoApiService = UfoApiService.create(),
     private val notifier: InterventionNotifier = InterventionNotifier.getInstance(context)
 ) {
 
@@ -60,7 +68,7 @@ class RiskEvaluator(
     private val recentAlertCooldownMap = ConcurrentHashMap<String, Long>()
 
     /**
-     * Evaluates risk asynchronously on Dispatchers.Default without blocking caller.
+     * Evaluates risk asynchronously when a UPI app screen or notification is intercepted in background.
      */
     fun evaluateAndInterveneAsync(
         vpa: String,
@@ -70,8 +78,22 @@ class RiskEvaluator(
         contextText: String?,
         sourceApp: String?
     ) {
+        // Respect user's choice: if Background UPI Guard is turned off, do not run background interception
+        if (!UfoProtectionPrefs.isBackgroundGuardEnabled(context)) {
+            Log.d(TAG, "Background UPI Guard is disabled by user choice; skipping screen evaluation.")
+            return
+        }
+
         scope.launch {
-            evaluate(vpa, payeeName, amount, isCollectRequest, contextText, sourceApp, triggerIntervention = true)
+            evaluate(
+                vpa = vpa,
+                payeeName = payeeName,
+                amount = amount,
+                isCollectRequest = isCollectRequest,
+                contextText = contextText,
+                sourceApp = sourceApp,
+                triggerIntervention = true
+            )
         }
     }
 
@@ -83,7 +105,7 @@ class RiskEvaluator(
         contextText: String?,
         sourceApp: String?,
         triggerIntervention: Boolean = true
-    ): RiskEvaluationResult = withContext(Dispatchers.Default) {
+    ): RiskEvaluationResult = withContext(Dispatchers.IO) {
         val startTime = System.currentTimeMillis()
         val normalizedVpa = vpa.trim().lowercase()
 
@@ -98,7 +120,8 @@ class RiskEvaluator(
                 status = RiskStatus.SAFE,
                 triggers = listOf("Session Whitelisted by User"),
                 isHardBlocked = false,
-                latencyMs = elapsed
+                latencyMs = elapsed,
+                sourceApp = sourceApp
             )
         }
 
@@ -113,41 +136,82 @@ class RiskEvaluator(
                 status = RiskStatus.SAFE,
                 triggers = listOf("Trusted Receiver Whitelist"),
                 isHardBlocked = false,
-                latencyMs = elapsed
+                latencyMs = elapsed,
+                sourceApp = sourceApp
             )
         }
 
-        val triggers = mutableListOf<String>()
-        var cumulativeScore = 0
-        var isHardBlocked = false
-
-        // Layer 1: Zero-Latency Local Bloom Filter
-        if (bloomFilter.contains(normalizedVpa)) {
-            cumulativeScore = 99
-            isHardBlocked = true
-            triggers.add("Blacklisted Fraud ID: Matched in offline fraud database")
-        }
-
-        // Layer 2: Heuristic & Behavioral Analysis
-        if (!isHardBlocked) {
-            val heuristicResult = heuristicEngine.evaluate(
-                vpa = vpa,
-                payeeName = payeeName,
-                isCollectRequest = isCollectRequest,
-                contextText = contextText
-            )
-            cumulativeScore += heuristicResult.riskScoreDelta
-            triggers.addAll(heuristicResult.triggers)
-        }
-
-        // Layer 3: Live Call / Vishing Telemetry
         val callActive = callStateMonitor.isCallActive()
-        if (callActive) {
-            cumulativeScore += 50
-            triggers.add("ACTIVE CALL DETECTED: Scammers stay on calls to pressure victims")
+        val triggers = mutableListOf<String>()
+        var finalScore = 0
+        var isHardBlocked = false
+        var backendVerified = false
+
+        // Step 1: Send extracted screen details (Receiver, VPA, Amount) to Backend (/api/v1/evaluate)
+        try {
+            val response = apiService.evaluateTransaction(
+                EvaluateRequest(
+                    vpa = normalizedVpa,
+                    receiver = payeeName,
+                    payeeName = payeeName,
+                    amount = amount ?: 0.0,
+                    isCollectRequest = isCollectRequest,
+                    callStateOffhook = callActive,
+                    sourceApp = sourceApp
+                )
+            )
+            val body = response.body()
+            if (response.isSuccessful && body != null) {
+                backendVerified = true
+                finalScore = if (body.risk <= 1.0f && body.risk > 0f) {
+                    (body.risk * 100f).roundToInt()
+                } else {
+                    body.risk.roundToInt().coerceIn(0, 100)
+                }
+                isHardBlocked = body.isBlacklisted || finalScore >= 90
+                triggers.addAll(body.reasons)
+                Log.d(TAG, "Backend evaluation succeeded: score=$finalScore, reasons=${body.reasons}")
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "Backend under process / unreachable (${e.message}), using on-device risk engine fallback.")
         }
 
-        val finalScore = min(cumulativeScore, 100)
+        // Step 2: If backend is under process / offline, compute via on-device risk engine
+        if (!backendVerified) {
+            var cumulativeScore = 0
+
+            // Layer 1: Zero-Latency Local Bloom Filter
+            if (bloomFilter.contains(normalizedVpa)) {
+                cumulativeScore = 99
+                isHardBlocked = true
+                triggers.add("Blacklisted Fraud ID: Matched in fraud signature database")
+            }
+
+            // Layer 2: Heuristic & Behavioral Analysis
+            if (!isHardBlocked) {
+                val heuristicResult = heuristicEngine.evaluate(
+                    vpa = vpa,
+                    payeeName = payeeName,
+                    isCollectRequest = isCollectRequest,
+                    contextText = contextText
+                )
+                cumulativeScore += heuristicResult.riskScoreDelta
+                triggers.addAll(heuristicResult.triggers)
+            }
+
+            // Layer 3: Live Call / Vishing Telemetry
+            if (callActive) {
+                cumulativeScore += 50
+                triggers.add("ACTIVE CALL DETECTED: Potential vishing pressure")
+            }
+
+            finalScore = min(cumulativeScore, 100)
+        }
+
+        if (triggers.isEmpty()) {
+            triggers.add("Verified Receiver • No fraud indicators matched")
+        }
+
         val status = when {
             finalScore >= 60 -> RiskStatus.FRAUD
             finalScore >= 30 -> RiskStatus.WARNING
@@ -165,18 +229,21 @@ class RiskEvaluator(
             status = status,
             triggers = triggers,
             isHardBlocked = isHardBlocked,
-            latencyMs = elapsed
+            latencyMs = elapsed,
+            backendVerified = backendVerified,
+            sourceApp = sourceApp
         )
 
-        // Trigger Intervention if risky and cooldown elapsed
-        if (triggerIntervention && status != RiskStatus.SAFE) {
-            val lastAlertTime = recentAlertCooldownMap[normalizedVpa] ?: 0L
+        // Step 3: Show Truecaller-Style Notification Popup & Record Check
+        if (triggerIntervention) {
+            val shouldShowForCurrentStatus = status != RiskStatus.SAFE || UfoProtectionPrefs.shouldShowPopupForSafe(context)
+            val dedupeKey = "$normalizedVpa:${amount ?: 0.0}"
+            val lastAlertTime = recentAlertCooldownMap[dedupeKey] ?: 0L
             val now = System.currentTimeMillis()
 
             if (now - lastAlertTime > VPA_ALERT_COOLDOWN_MS) {
-                recentAlertCooldownMap[normalizedVpa] = now
+                recentAlertCooldownMap[dedupeKey] = now
 
-                // Save to Room SQLite database
                 repository.recordFlaggedTransaction(
                     vpa = vpa,
                     payeeName = payeeName,
@@ -186,19 +253,21 @@ class RiskEvaluator(
                     sourceApp = sourceApp
                 )
 
-                // Dispatch non-blocking heads-up notification
-                notifier.showIntervention(
-                    vpa = vpa,
-                    riskScore = finalScore,
-                    primaryTrigger = triggers.firstOrNull() ?: "High Risk Anomaly",
-                    secondaryTrigger = triggers.drop(1).joinToString(" • "),
-                    payeeName = payeeName,
-                    amount = amount
-                )
+                if (shouldShowForCurrentStatus) {
+                    notifier.showIntervention(
+                        vpa = vpa,
+                        riskScore = finalScore,
+                        primaryTrigger = triggers.firstOrNull() ?: "Evaluated by UFO Guard",
+                        secondaryTrigger = triggers.drop(1).firstOrNull(),
+                        payeeName = payeeName,
+                        amount = amount,
+                        sourceApp = sourceApp,
+                        backendVerified = backendVerified
+                    )
+                }
             }
         }
 
         return@withContext result
     }
 }
-

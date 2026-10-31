@@ -1,0 +1,35 @@
+R_DEF: Internal format may change without notice
+local
+color alert_red
+color bg_dark
+color crimson_dark
+color pink_80
+color purple_80
+color purple_grey_80
+color safe_green
+color surface_dark
+color warning_amber
+drawable bg_crimson_notch
+drawable bg_risk_badge
+drawable bg_safe_badge
+drawable bg_warn_badge
+drawable btn_abort_bg
+drawable btn_dismiss_bg
+drawable ic_launcher_ufo
+id btn_abort_payment
+id btn_dismiss_notch
+id notch_amount
+id notch_container
+id notch_header
+id notch_reason
+id notch_risk_badge
+id notch_vpa
+layout notification_fraud_notch
+string accessibility_service_description
+string app_name
+string channel_critical_alerts
+string channel_critical_alerts_desc
+style Theme.UfoFraudObserver
+xml accessibility_service_config
+xml backup_rules
+xml data_extraction_rules
