@@ -6,6 +6,22 @@
 service-account*.json
 credentials*.json
 
+# Tools & Local JDK
+tools/
+.jdks/
+
+# Android / Gradle Local & Caches
+*.apk
+*.aab
+local.properties
+.gradle/
+build/
+app/build/
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+
 # Python
 __pycache__/
 *.py[cod]
