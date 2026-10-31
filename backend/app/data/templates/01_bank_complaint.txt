@@ -1,0 +1,37 @@
+From:
+{{complainant_name}}
+{{complainant_address}}
+Phone: {{complainant_phone}}
+Email: {{complainant_email}}
+
+Date: {{date_today}}
+
+To:
+The Branch Manager / Customer Service Officer
+{{bank_name}}
+
+Subject: Grievance regarding failed {{rail_label}} transaction (UTR: {{utr}})
+
+Dear Sir/Madam,
+
+I am writing to register a formal grievance regarding a failed {{rail_label}} payment initiated from my bank account, as per my records and details provided by me.
+
+Transaction Details:
+- Transaction Reference / UTR: {{utr}}
+- Amount: Rs. {{amount}}
+- Transaction Date and Time: {{txn_date}} {{txn_time}}
+- Payment Rail: {{rail_label}}
+
+As per the Reserve Bank of India circular {{circular_ref}} (Turn Around Time and Harmonisation of Customer Compensation, row: {{circular_row}}), the mandated turnaround time for auto-reversal is T + {{tat_days}} calendar days (due date: {{due_date}}).
+
+{{reversal_clause}}
+
+{{compensation_clause}}
+
+I request you to kindly investigate this matter, process the pending reversal and any statutory compensation applicable under the circular at the earliest, and provide a written response along with a formal complaint reference number for my records.
+
+Thank you.
+
+Yours sincerely,
+{{complainant_name}}
+

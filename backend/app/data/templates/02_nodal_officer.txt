@@ -1,0 +1,37 @@
+From:
+{{complainant_name}}
+{{complainant_address}}
+Phone: {{complainant_phone}}
+Email: {{complainant_email}}
+
+Date: {{date_today}}
+
+To:
+The Principal / Nodal Officer
+{{bank_name}}
+
+Subject: Escalation: Unresolved grievance regarding failed {{rail_label}} transaction (Prior Complaint Ref: {{prior_complaint_ref}}, UTR: {{utr}})
+
+Dear Sir/Madam,
+
+I am writing to escalate my grievance regarding a failed {{rail_label}} transaction, as per my records and details provided by me. I had previously lodged a complaint (Reference Number: {{prior_complaint_ref}}) on {{prior_complaint_date}}, but no satisfactory resolution was received within the mandated turnaround timeframe.
+
+Transaction Details:
+- Transaction Reference / UTR: {{utr}}
+- Amount: Rs. {{amount}}
+- Transaction Date and Time: {{txn_date}} {{txn_time}}
+- Mandated Due Date: {{due_date}} (T + {{tat_days}} days)
+
+As per RBI circular {{circular_ref}} (row: {{circular_row}}), the transaction was due for resolution by {{due_date}}. Delay beyond the turnaround time entitles the customer to compensation as applicable under the circular.
+
+{{reversal_clause}}
+
+{{compensation_clause}}
+
+I request your intervention to ensure that this grievance is resolved without further delay, and that applicable reversal and compensation as per RBI guidelines are credited to my account. Please provide a formal written acknowledgement and update.
+
+Thank you.
+
+Yours sincerely,
+{{complainant_name}}
+

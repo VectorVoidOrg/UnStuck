@@ -1,0 +1,107 @@
+[
+  {
+    "name": "State Bank of India",
+    "aliases": ["SBI", "State Bank"],
+    "nodal_officer_email": null,
+    "grievance_url": null,
+    "contact_status": "unverified",
+    "last_verified": null
+  },
+  {
+    "name": "HDFC Bank",
+    "aliases": ["HDFC"],
+    "nodal_officer_email": null,
+    "grievance_url": null,
+    "contact_status": "unverified",
+    "last_verified": null
+  },
+  {
+    "name": "ICICI Bank",
+    "aliases": ["ICICI"],
+    "nodal_officer_email": null,
+    "grievance_url": null,
+    "contact_status": "unverified",
+    "last_verified": null
+  },
+  {
+    "name": "Axis Bank",
+    "aliases": ["Axis", "UTI Bank"],
+    "nodal_officer_email": null,
+    "grievance_url": null,
+    "contact_status": "unverified",
+    "last_verified": null
+  },
+  {
+    "name": "Punjab National Bank",
+    "aliases": ["PNB"],
+    "nodal_officer_email": null,
+    "grievance_url": null,
+    "contact_status": "unverified",
+    "last_verified": null
+  },
+  {
+    "name": "Bank of Baroda",
+    "aliases": ["BOB", "Baroda Bank"],
+    "nodal_officer_email": null,
+    "grievance_url": null,
+    "contact_status": "unverified",
+    "last_verified": null
+  },
+  {
+    "name": "Kotak Mahindra Bank",
+    "aliases": ["Kotak", "Kotak Bank"],
+    "nodal_officer_email": null,
+    "grievance_url": null,
+    "contact_status": "unverified",
+    "last_verified": null
+  },
+  {
+    "name": "Canara Bank",
+    "aliases": ["Canara"],
+    "nodal_officer_email": null,
+    "grievance_url": null,
+    "contact_status": "unverified",
+    "last_verified": null
+  },
+  {
+    "name": "Union Bank of India",
+    "aliases": ["Union Bank", "UBI"],
+    "nodal_officer_email": null,
+    "grievance_url": null,
+    "contact_status": "unverified",
+    "last_verified": null
+  },
+  {
+    "name": "IDFC FIRST Bank",
+    "aliases": ["IDFC", "IDFC First", "IDFC Bank"],
+    "nodal_officer_email": null,
+    "grievance_url": null,
+    "contact_status": "unverified",
+    "last_verified": null
+  },
+  {
+    "name": "Yes Bank",
+    "aliases": ["Yes"],
+    "nodal_officer_email": null,
+    "grievance_url": null,
+    "contact_status": "unverified",
+    "last_verified": null
+  },
+  {
+    "name": "IndusInd Bank",
+    "aliases": ["IndusInd"],
+    "nodal_officer_email": null,
+    "grievance_url": null,
+    "contact_status": "unverified",
+    "last_verified": null
+  },
+  {
+    "name": "Bank of India",
+    "aliases": ["BOI"],
+    "nodal_officer_email": null,
+    "grievance_url": null,
+    "contact_status": "unverified",
+    "last_verified": null
+  }
+]
+

@@ -1,0 +1,38 @@
+SUMMARY OF GRIEVANCE FOR SUBMISSION TO RBI OMBUDSMAN
+(Under the Reserve Bank - Integrated Ombudsman Scheme)
+
+Date: {{date_today}}
+
+Complainant Details:
+- Name: {{complainant_name}}
+- Address: {{complainant_address}}
+- Phone: {{complainant_phone}}
+- Email: {{complainant_email}}
+
+Regulated Entity (Bank):
+- Bank Name: {{bank_name}}
+
+Transaction Details:
+- UTR / Reference Number: {{utr}}
+- Amount: Rs. {{amount}}
+- Transaction Date & Time: {{txn_date}} {{txn_time}}
+- Payment Rail / Type: {{rail_label}}
+
+Prior Complaint Details:
+- Bank Complaint Reference Number: {{prior_complaint_ref}}
+- Date of Complaint to Bank: {{prior_complaint_date}}
+- Status: Unresolved / Unsatisfactory response after mandatory 30-day waiting period
+
+Applicable RBI Regulatory Framework:
+- Circular Reference: {{circular_ref}}
+- Category: {{circular_row}}
+- Mandated Resolution Due Date: {{due_date}} (T + {{tat_days}} days)
+
+Relief Sought:
+1. {{reversal_clause}}
+2. {{compensation_clause}}
+3. Directions to the bank to ensure compliance with RBI TAT harmonization directions.
+
+Declaration:
+The details stated above are true and complete as per my records and details provided by me.
+
