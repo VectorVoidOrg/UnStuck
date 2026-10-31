@@ -177,28 +177,39 @@ class LocalCollection:
 
 
 class LocalMongoDatabase:
-    """Persistent JSON-backed MongoDB emulator for zero-downtime local operation."""
+    """Persistent JSON-backed MongoDB emulator for zero-downtime local & serverless operation."""
 
     def __init__(self, storage_path: Path):
         self.storage_path = storage_path
-        self.storage_path.parent.mkdir(parents=True, exist_ok=True)
+        self._tmp_path = Path("/tmp/ufo_local_db.json")
+        try:
+            self.storage_path.parent.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
         self._lock = threading.RLock()
         self._data: Dict[str, List[Dict[str, Any]]] = {}
         self._collections: Dict[str, LocalCollection] = {}
         self._load()
 
     def _load(self) -> None:
-        if self.storage_path.exists():
-            try:
-                self._data = json.loads(self.storage_path.read_text(encoding="utf-8"))
-            except Exception:
-                self._data = {}
+        for candidate in [self._tmp_path, self.storage_path]:
+            if candidate.exists():
+                try:
+                    self._data = json.loads(candidate.read_text(encoding="utf-8"))
+                    if self._data:
+                        return
+                except Exception:
+                    self._data = {}
 
     def _persist(self) -> None:
+        payload = json.dumps(self._data, indent=2, default=str)
         try:
-            self.storage_path.write_text(json.dumps(self._data, indent=2, default=str), encoding="utf-8")
+            self.storage_path.write_text(payload, encoding="utf-8")
         except Exception:
-            pass
+            try:
+                self._tmp_path.write_text(payload, encoding="utf-8")
+            except Exception:
+                pass
 
     def __getitem__(self, name: str) -> LocalCollection:
         if name not in self._collections:

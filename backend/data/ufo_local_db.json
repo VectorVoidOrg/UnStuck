@@ -13,8 +13,8 @@
     {
       "receiver": "cbi.digitalarrest@ybl",
       "avg_risk": 0.98,
-      "flag_count": 30,
-      "transactions": 34,
+      "flag_count": 31,
+      "transactions": 35,
       "scam_type": "DIGITAL_ARREST_EXTORTION",
       "status": "BLACKLISTED",
       "_id": "hall_of_shame_2",
@@ -3057,6 +3057,16 @@
       "status": "SETTLED",
       "verified_in_npci": true,
       "timestamp": "2026-10-31T13:29:34.589021+00:00"
+    },
+    {
+      "utr_number": "406101741459",
+      "_id": "npci_ledger_6",
+      "payer_vpa": "<UPI_VPA_TOKEN_44EC72283A>",
+      "payee_vpa": "<UPI_VPA_TOKEN_048AA53070>",
+      "amount": 500.0,
+      "status": "SETTLED",
+      "verified_in_npci": true,
+      "timestamp": "2026-10-31T19:25:25.936628+00:00"
     }
   ],
   "semantic_cache": [
@@ -3243,16 +3253,16 @@
     {
       "receiver": "mom@oksbi",
       "_id": "receivers_1",
-      "transactions": 9,
-      "total_risk": 0.1038586430385143,
+      "transactions": 10,
+      "total_risk": 0.10757032720729696,
       "flag_count": 0
     },
     {
       "receiver": "cbi.digitalarrest@ybl",
       "_id": "receivers_2",
-      "transactions": 34,
-      "total_risk": 33.290000000000006,
-      "flag_count": 30
+      "transactions": 35,
+      "total_risk": 34.24000000000001,
+      "flag_count": 31
     },
     {
       "receiver": "cbi.digitalarrest@okaxis",
@@ -5556,6 +5566,32 @@
       "latency_ms": 0.019,
       "timestamp": "2026-10-31T13:29:34.623529+00:00",
       "_id": "transactions_17"
+    },
+    {
+      "utr_number": "406101741459",
+      "user_token": "<UPI_VPA_TOKEN_44EC72283A>",
+      "receiver_token": "<UPI_VPA_TOKEN_048AA53070>",
+      "amount": 500.0,
+      "risk": 0.0,
+      "status": "SAFE",
+      "decision_action": "ALLOW_PAYMENT",
+      "async_investigation_id": null,
+      "latency_ms": 5.077,
+      "timestamp": "2026-10-31T19:25:25.924611+00:00",
+      "_id": "transactions_18"
+    },
+    {
+      "utr_number": "487979893557",
+      "user_token": "<UPI_VPA_TOKEN_44EC72283A>",
+      "receiver_token": "<UPI_VPA_TOKEN_D60EB40A4E>",
+      "amount": 15000.0,
+      "risk": 0.95,
+      "status": "FRAUD",
+      "decision_action": "BLOCK_SCAM",
+      "async_investigation_id": null,
+      "latency_ms": 0.049,
+      "timestamp": "2026-10-31T19:25:26.029875+00:00",
+      "_id": "transactions_19"
     }
   ],
   "investigations": [
@@ -7080,6 +7116,202 @@
       "hitl_ticket_id": "HITL-EDF38A8EA3",
       "total_processing_ms": 1905.443,
       "created_at": "2026-10-31T13:29:34.787858+00:00"
+    },
+    {
+      "investigation_id": "INV-5E4E58798E",
+      "_id": "investigations_39",
+      "status": "COMPLETED",
+      "tier_used": "SEMANTIC_CACHE",
+      "cache_hit": true,
+      "redacted_context": "Dear consumer electricity power supply will be disconnected tonight 9:30 pm bill not updated call officer whatsapp apk",
+      "pii_tokens_created": 0,
+      "prompt_injection_detected": false,
+      "reasoning_loops_used": 0,
+      "tokens_consumed": 0,
+      "circuit_breaker_tripped": false,
+      "agent_verdict": {
+        "is_scam": true,
+        "scam_category": "FAKE_KYC",
+        "confidence": 0.96,
+        "recommended_action": "AUTO_REFUND",
+        "recommended_refund_inr": 2400.0,
+        "place_lien": true,
+        "rbi_circular_citations": [
+          "RBI/2017-18/15 Limited Liability Circular",
+          "NPCI/UPI/OC-UDIR/2023 Real-Time Fraud Reversal"
+        ],
+        "reasoning_summary": "Matched known 'Electricity Disconnection Tonight' social engineering scam template."
+      },
+      "policy_guardrail_applied": false,
+      "policy_guardrail_notes": [
+        "Guardrail Verified: Auto-refund of \u20b92,400.00 is within \u20b95,000 cap and ledger checks passed."
+      ],
+      "final_action": "AUTO_REFUND",
+      "npci_tool_results": [
+        {
+          "tool_name": "place_npci_lien",
+          "idempotency_key": "idem_e41a02ad14d70370",
+          "status": "SUCCESS",
+          "lien_id": "LIEN-NPCI-DB84A4B1",
+          "refund_tx_id": null,
+          "amount_processed_inr": 2400.0,
+          "message": "Idempotent NPCI UDIR Lien placed on payee account (FAKE_KYC)",
+          "timestamp": "2026-10-31T19:25:26.181158+00:00"
+        },
+        {
+          "tool_name": "execute_auto_refund",
+          "idempotency_key": "idem_d905bc646859874e",
+          "status": "SUCCESS",
+          "lien_id": null,
+          "refund_tx_id": "RFD-NPCI-D4D768BF",
+          "amount_processed_inr": 2400.0,
+          "message": "Idempotent instant auto-refund of \u20b92,400.00 credited to victim account",
+          "timestamp": "2026-10-31T19:25:26.181158+00:00"
+        }
+      ],
+      "hitl_ticket_id": null,
+      "total_processing_ms": 33.381,
+      "created_at": "2026-10-31T19:25:26.147379+00:00"
+    },
+    {
+      "investigation_id": "INV-23E38758A4",
+      "_id": "investigations_40",
+      "status": "ESCALATED_HITL",
+      "tier_used": "SEMANTIC_CACHE",
+      "cache_hit": true,
+      "redacted_context": "Fake CBI officer on Skype video call threatened digital arrest over customs parcel and forced transfer of \u20b945,000 to verification account.",
+      "pii_tokens_created": 0,
+      "prompt_injection_detected": false,
+      "reasoning_loops_used": 0,
+      "tokens_consumed": 0,
+      "circuit_breaker_tripped": false,
+      "agent_verdict": {
+        "is_scam": true,
+        "scam_category": "DIGITAL_ARREST",
+        "confidence": 0.98,
+        "recommended_action": "AUTO_REFUND",
+        "recommended_refund_inr": 45000.0,
+        "place_lien": true,
+        "rbi_circular_citations": [
+          "RBI/2017-18/15 Clauses 6-9 (Coerced / Social Engineering Fraud Reporting)",
+          "MHA I4C 1930 Golden Hour Lien Freeze Protocol"
+        ],
+        "reasoning_summary": "Matched known 'Digital Arrest' impersonation scam template (law enforcement coercion over video/voice call)."
+      },
+      "policy_guardrail_applied": true,
+      "policy_guardrail_notes": [
+        "Guardrail Rule A (\u20b95k Cap): Blocked auto-refund of \u20b945,000.00 (> \u20b95,000 limit). Protective NPCI Lien authorized; refund escalated to HITL officer."
+      ],
+      "final_action": "PLACE_LIEN",
+      "npci_tool_results": [
+        {
+          "tool_name": "place_npci_lien",
+          "idempotency_key": "idem_b738005e8b27dbcc",
+          "status": "SUCCESS",
+          "lien_id": "LIEN-NPCI-DAD0920A",
+          "refund_tx_id": null,
+          "amount_processed_inr": 45000.0,
+          "message": "Idempotent NPCI UDIR Lien placed on payee account (DIGITAL_ARREST)",
+          "timestamp": "2026-10-31T19:25:26.254450+00:00"
+        }
+      ],
+      "hitl_ticket_id": "HITL-9B64D77280",
+      "total_processing_ms": 40.358,
+      "created_at": "2026-10-31T19:25:26.225867+00:00"
+    },
+    {
+      "investigation_id": "INV-58F9DD8C71",
+      "_id": "investigations_41",
+      "status": "COMPLETED",
+      "tier_used": "FRONTIER_LLM_RAG",
+      "cache_hit": false,
+      "redacted_context": "hallucinate_refund_test: Sent \u20b91800 by mistake, see attached screenshot receipt. | [OCR_RECEIPT]: Paid \u20b91800 UTR 0000FAKE9999",
+      "pii_tokens_created": 0,
+      "prompt_injection_detected": false,
+      "reasoning_loops_used": 2,
+      "tokens_consumed": 550,
+      "circuit_breaker_tripped": false,
+      "agent_verdict": {
+        "is_scam": true,
+        "scam_category": "FAKE_RECEIPT",
+        "confidence": 0.88,
+        "recommended_action": "AUTO_REFUND",
+        "recommended_refund_inr": 1800.0,
+        "place_lien": true,
+        "rbi_circular_citations": [
+          "NPCI-UDIR-2023-01: NPCI Unified Dispute & Issue Resolution (UDIR) & Real-Time Lien Marking",
+          "RBI-2017-18-15-CL6: RBI Circular DBR.No.Leg.BC.78/09.07.005/2017-18 \u2014 Zero Liability of Customer",
+          "RBI-2017-18-15-CL10: RBI Circular Clause 10 \u2014 Shadow Reversal / Provisional Credit within 10 Working Days"
+        ],
+        "reasoning_summary": "Simulated Frontier LLM recommending auto-refund (to be intercepted by Layer 5 Policy Guardrail)."
+      },
+      "policy_guardrail_applied": true,
+      "policy_guardrail_notes": [
+        "Guardrail Rule B: Blocked hallucinated/requested auto-refund because UTR failed NPCI ledger verification (Fake Receipt protection)."
+      ],
+      "final_action": "BLOCK_SCAM",
+      "npci_tool_results": [],
+      "hitl_ticket_id": null,
+      "total_processing_ms": 52.932,
+      "created_at": "2026-10-31T19:25:26.306179+00:00"
+    },
+    {
+      "investigation_id": "INV-D99409D9B9",
+      "_id": "investigations_42",
+      "status": "ESCALATED_HITL",
+      "tier_used": "SMALL_QUANTIZED_MODEL",
+      "cache_hit": false,
+      "redacted_context": "Complex multi-step dispute with loop_explosion_test triggered during festival spike",
+      "pii_tokens_created": 0,
+      "prompt_injection_detected": false,
+      "reasoning_loops_used": 3,
+      "tokens_consumed": 2700,
+      "circuit_breaker_tripped": true,
+      "agent_verdict": null,
+      "policy_guardrail_applied": true,
+      "policy_guardrail_notes": [
+        "Circuit Breaker tripped: Agent attempted reasoning loop #4, exceeding hard cap of 3 loops."
+      ],
+      "final_action": "ESCALATE_TO_HITL",
+      "npci_tool_results": [],
+      "hitl_ticket_id": "HITL-F02015B4F0",
+      "total_processing_ms": 38.281,
+      "created_at": "2026-10-31T19:25:26.389537+00:00"
+    },
+    {
+      "investigation_id": "INV-857269320D",
+      "_id": "investigations_43",
+      "status": "DLQ_504",
+      "tier_used": "SMALL_QUANTIZED_MODEL",
+      "cache_hit": false,
+      "redacted_context": "Electricity bill disconnection scam call asked me to pay \u20b92500 urgently",
+      "pii_tokens_created": 0,
+      "prompt_injection_detected": false,
+      "reasoning_loops_used": 1,
+      "tokens_consumed": 120,
+      "circuit_breaker_tripped": false,
+      "agent_verdict": {
+        "is_scam": true,
+        "scam_category": "FAKE_KYC",
+        "confidence": 0.91,
+        "recommended_action": "AUTO_REFUND",
+        "recommended_refund_inr": 2500.0,
+        "place_lien": true,
+        "rbi_circular_citations": [
+          "RBI/2017-18/15 Clause 7 (Social Engineering & Immediate Lien)"
+        ],
+        "reasoning_summary": "SLM detected urgent KYC/utility disconnection social engineering indicators in redacted context."
+      },
+      "policy_guardrail_applied": false,
+      "policy_guardrail_notes": [
+        "Guardrail Verified: Auto-refund of \u20b92,500.00 is within \u20b95,000 cap and ledger checks passed.",
+        "Resilience #4 (DLQ): 504 Gateway Timeout: Beneficiary Bank switch for 'timeout@upi' did not respond within 2500ms -> Routed to HITL & Dead Letter Queue."
+      ],
+      "final_action": "ESCALATE_TO_HITL",
+      "npci_tool_results": [],
+      "hitl_ticket_id": "HITL-C31334211C",
+      "total_processing_ms": 2510.115,
+      "created_at": "2026-10-31T19:25:26.464491+00:00"
     }
   ],
   "hitl_dead_letter_queue": [
@@ -7803,6 +8035,104 @@
           "timestamp": "2026-10-31T13:29:36.716386+00:00"
         }
       ]
+    },
+    {
+      "ticket_id": "HITL-9B64D77280",
+      "investigation_id": "INV-23E38758A4",
+      "queue_type": "HITL_POLICY_CAP",
+      "status": "PENDING_HUMAN_AUDIT",
+      "reason": "Disputed refund \u20b945,000.00 exceeds hard deterministic auto-refund cap of \u20b95,000.00",
+      "payer_vpa": "<UPI_VPA_TOKEN_C1396FE754>",
+      "payee_vpa": "<UPI_VPA_TOKEN_1EF954A3EC>",
+      "amount_inr": 45000.0,
+      "redacted_context": "Fake CBI officer on Skype video call threatened digital arrest over customs parcel and forced transfer of \u20b945,000 to verification account.",
+      "agent_verdict": {
+        "is_scam": true,
+        "scam_category": "DIGITAL_ARREST",
+        "confidence": 0.98,
+        "recommended_action": "AUTO_REFUND",
+        "recommended_refund_inr": 45000.0,
+        "place_lien": true,
+        "rbi_circular_citations": [
+          "RBI/2017-18/15 Clauses 6-9 (Coerced / Social Engineering Fraud Reporting)",
+          "MHA I4C 1930 Golden Hour Lien Freeze Protocol"
+        ],
+        "reasoning_summary": "Matched known 'Digital Arrest' impersonation scam template (law enforcement coercion over video/voice call)."
+      },
+      "created_at": "2026-10-31T19:25:26.255452+00:00",
+      "resolved_at": null,
+      "reviewer_id": null,
+      "resolution_notes": null,
+      "_id": "hitl_dead_letter_queue_22"
+    },
+    {
+      "ticket_id": "HITL-F02015B4F0",
+      "investigation_id": "INV-D99409D9B9",
+      "queue_type": "DLQ_CIRCUIT_BREAKER",
+      "status": "PENDING_HUMAN_AUDIT",
+      "reason": "Circuit Breaker tripped: Agent attempted reasoning loop #4, exceeding hard cap of 3 loops.",
+      "payer_vpa": "<UPI_VPA_TOKEN_DDC1A91159>",
+      "payee_vpa": "suspect@ybl",
+      "amount_inr": 3200.0,
+      "redacted_context": "Complex multi-step dispute with loop_explosion_test triggered during festival spike",
+      "agent_verdict": {},
+      "created_at": "2026-10-31T19:25:26.414791+00:00",
+      "resolved_at": null,
+      "reviewer_id": null,
+      "resolution_notes": null,
+      "_id": "hitl_dead_letter_queue_23"
+    },
+    {
+      "ticket_id": "HITL-C31334211C",
+      "investigation_id": "INV-857269320D",
+      "queue_type": "DLQ_BANK_504",
+      "status": "RESOLVED_BY_HUMAN",
+      "reason": "504 Gateway Timeout: Beneficiary Bank switch for 'timeout@upi' did not respond within 2500ms",
+      "payer_vpa": "<UPI_VPA_TOKEN_33C6CA9802>",
+      "payee_vpa": "timeout@upi",
+      "amount_inr": 2500.0,
+      "redacted_context": "Electricity bill disconnection scam call asked me to pay \u20b92500 urgently",
+      "agent_verdict": {
+        "is_scam": true,
+        "scam_category": "FAKE_KYC",
+        "confidence": 0.91,
+        "recommended_action": "AUTO_REFUND",
+        "recommended_refund_inr": 2500.0,
+        "place_lien": true,
+        "rbi_circular_citations": [
+          "RBI/2017-18/15 Clause 7 (Social Engineering & Immediate Lien)"
+        ],
+        "reasoning_summary": "SLM detected urgent KYC/utility disconnection social engineering indicators in redacted context."
+      },
+      "created_at": "2026-10-31T19:25:28.958252+00:00",
+      "resolved_at": "2026-10-31T19:25:29.012738+00:00",
+      "reviewer_id": "rbi_auditor_01",
+      "resolution_notes": "Verified settled UTR in NPCI switch after bank gateway recovery; approved refund.",
+      "_id": "hitl_dead_letter_queue_24",
+      "approved_action": "AUTO_REFUND",
+      "approved_refund_inr": 2500.0,
+      "npci_tool_results": [
+        {
+          "tool_name": "place_npci_lien",
+          "idempotency_key": "idem_cfeecc50a6c40007",
+          "status": "SUCCESS",
+          "lien_id": "LIEN-NPCI-724E5BC6",
+          "refund_tx_id": null,
+          "amount_processed_inr": 2500.0,
+          "message": "Idempotent NPCI UDIR Lien placed on payee account (HITL Officer rbi_auditor_01 Approved Lien)",
+          "timestamp": "2026-10-31T19:25:29.012738+00:00"
+        },
+        {
+          "tool_name": "execute_auto_refund",
+          "idempotency_key": "idem_357dbcab59ce4524",
+          "status": "SUCCESS",
+          "lien_id": null,
+          "refund_tx_id": "RFD-NPCI-FE2441A1",
+          "amount_processed_inr": 2500.0,
+          "message": "Idempotent instant auto-refund of \u20b92,500.00 credited to victim account",
+          "timestamp": "2026-10-31T19:25:29.012738+00:00"
+        }
+      ]
     }
   ],
   "audit_logs": [
@@ -8373,6 +8703,85 @@
       },
       "timestamp": "2026-10-31T13:29:36.701379+00:00",
       "_id": "audit_logs_42"
+    },
+    {
+      "event_type": "RBI_FRAUD_ESCALATION",
+      "receiver": "cbi.digitalarrest@ybl",
+      "avg_risk": 0.978,
+      "flag_count": 31,
+      "message": "Repeated high-risk fraud patterns detected; VPA blacklisted in Hall of Shame",
+      "timestamp": "2026-10-31T19:25:25.996223+00:00",
+      "_id": "audit_logs_43"
+    },
+    {
+      "event_type": "AGENT_INVESTIGATION_COMPLETED",
+      "reference_id": "INV-5E4E58798E",
+      "summary": "Tier=SEMANTIC_CACHE | Status=COMPLETED | Action=AUTO_REFUND | Guardrail=False",
+      "metadata": {
+        "cache_hit": true,
+        "loops": 0,
+        "tokens": 0,
+        "hitl_ticket_id": null,
+        "processing_ms": 33.381
+      },
+      "timestamp": "2026-10-31T19:25:26.198361+00:00",
+      "_id": "audit_logs_44"
+    },
+    {
+      "event_type": "AGENT_INVESTIGATION_COMPLETED",
+      "reference_id": "INV-23E38758A4",
+      "summary": "Tier=SEMANTIC_CACHE | Status=ESCALATED_HITL | Action=PLACE_LIEN | Guardrail=True",
+      "metadata": {
+        "cache_hit": true,
+        "loops": 0,
+        "tokens": 0,
+        "hitl_ticket_id": "HITL-9B64D77280",
+        "processing_ms": 40.358
+      },
+      "timestamp": "2026-10-31T19:25:26.284080+00:00",
+      "_id": "audit_logs_45"
+    },
+    {
+      "event_type": "AGENT_INVESTIGATION_COMPLETED",
+      "reference_id": "INV-58F9DD8C71",
+      "summary": "Tier=FRONTIER_LLM_RAG | Status=COMPLETED | Action=BLOCK_SCAM | Guardrail=True",
+      "metadata": {
+        "cache_hit": false,
+        "loops": 2,
+        "tokens": 550,
+        "hitl_ticket_id": null,
+        "processing_ms": 52.932
+      },
+      "timestamp": "2026-10-31T19:25:26.369071+00:00",
+      "_id": "audit_logs_46"
+    },
+    {
+      "event_type": "AGENT_INVESTIGATION_COMPLETED",
+      "reference_id": "INV-D99409D9B9",
+      "summary": "Tier=SMALL_QUANTIZED_MODEL | Status=ESCALATED_HITL | Action=ESCALATE_TO_HITL | Guardrail=True",
+      "metadata": {
+        "cache_hit": false,
+        "loops": 3,
+        "tokens": 2700,
+        "hitl_ticket_id": "HITL-F02015B4F0",
+        "processing_ms": 38.281
+      },
+      "timestamp": "2026-10-31T19:25:26.441449+00:00",
+      "_id": "audit_logs_47"
+    },
+    {
+      "event_type": "AGENT_INVESTIGATION_COMPLETED",
+      "reference_id": "INV-857269320D",
+      "summary": "Tier=SMALL_QUANTIZED_MODEL | Status=DLQ_504 | Action=ESCALATE_TO_HITL | Guardrail=False",
+      "metadata": {
+        "cache_hit": false,
+        "loops": 1,
+        "tokens": 120,
+        "hitl_ticket_id": "HITL-C31334211C",
+        "processing_ms": 2510.115
+      },
+      "timestamp": "2026-10-31T19:25:28.990909+00:00",
+      "_id": "audit_logs_48"
     }
   ],
   "pii_token_vault": [
@@ -8381,119 +8790,119 @@
       "_id": "pii_token_vault_1",
       "pii_type": "UPI_VPA",
       "masked_preview": "dh***@okicici",
-      "created_at": "2026-10-31T13:29:34.573524+00:00"
+      "created_at": "2026-10-31T19:25:25.902168+00:00"
     },
     {
       "token": "<UPI_VPA_TOKEN_048AA53070>",
       "_id": "pii_token_vault_2",
       "pii_type": "UPI_VPA",
       "masked_preview": "mo***@oksbi",
-      "created_at": "2026-10-31T13:29:34.577665+00:00"
+      "created_at": "2026-10-31T19:25:25.912110+00:00"
     },
     {
       "token": "<UPI_VPA_TOKEN_D60EB40A4E>",
       "_id": "pii_token_vault_3",
       "pii_type": "UPI_VPA",
       "masked_preview": "cb***@ybl",
-      "created_at": "2026-10-31T13:29:34.618538+00:00"
+      "created_at": "2026-10-31T19:25:26.010734+00:00"
     },
     {
       "token": "<UPI_VPA_TOKEN_6607838692>",
       "_id": "pii_token_vault_4",
       "pii_type": "UPI_VPA",
       "masked_preview": "sc***@okaxis",
-      "created_at": "2026-10-31T13:29:34.632203+00:00"
+      "created_at": "2026-10-31T19:25:26.062735+00:00"
     },
     {
       "token": "<AADHAAR_TOKEN_A970D619D6>",
       "_id": "pii_token_vault_5",
       "pii_type": "AADHAAR",
       "masked_preview": "**********2345",
-      "created_at": "2026-10-31T13:29:34.638201+00:00"
+      "created_at": "2026-10-31T19:25:26.073135+00:00"
     },
     {
       "token": "<PHONE_TOKEN_94D65EA98A>",
       "_id": "pii_token_vault_6",
       "pii_type": "PHONE",
       "masked_preview": "**********3210",
-      "created_at": "2026-10-31T13:29:34.642227+00:00"
+      "created_at": "2026-10-31T19:25:26.084218+00:00"
     },
     {
       "token": "<BANK_AC_TOKEN_B813BCCAC5>",
       "_id": "pii_token_vault_7",
       "pii_type": "BANK_AC",
       "masked_preview": "********9012",
-      "created_at": "2026-10-31T13:29:34.646351+00:00"
+      "created_at": "2026-10-31T19:25:26.095053+00:00"
     },
     {
       "token": "<UPI_VPA_TOKEN_E8893DB550>",
       "_id": "pii_token_vault_8",
       "pii_type": "UPI_VPA",
       "masked_preview": "vi***@okaxis",
-      "created_at": "2026-10-31T13:29:34.661901+00:00"
+      "created_at": "2026-10-31T19:25:26.147379+00:00"
     },
     {
       "token": "<UPI_VPA_TOKEN_A49746ED60>",
       "_id": "pii_token_vault_9",
       "pii_type": "UPI_VPA",
       "masked_preview": "me***@ybl",
-      "created_at": "2026-10-31T13:29:34.666806+00:00"
+      "created_at": "2026-10-31T19:25:26.163298+00:00"
     },
     {
       "token": "<UPI_VPA_TOKEN_C1396FE754>",
       "_id": "pii_token_vault_10",
       "pii_type": "UPI_VPA",
       "masked_preview": "ci***@sbi",
-      "created_at": "2026-10-31T13:29:34.690327+00:00"
+      "created_at": "2026-10-31T19:25:26.225867+00:00"
     },
     {
       "token": "<UPI_VPA_TOKEN_1EF954A3EC>",
       "_id": "pii_token_vault_11",
       "pii_type": "UPI_VPA",
       "masked_preview": "cy***@axl",
-      "created_at": "2026-10-31T13:29:34.695961+00:00"
+      "created_at": "2026-10-31T19:25:26.239854+00:00"
     },
     {
       "token": "<UPI_VPA_TOKEN_F9FBD6B33E>",
       "_id": "pii_token_vault_12",
       "pii_type": "UPI_VPA",
       "masked_preview": "sc***@upi",
-      "created_at": "2026-10-31T13:29:34.727799+00:00"
+      "created_at": "2026-10-31T19:25:26.306179+00:00"
     },
     {
       "token": "<UPI_VPA_TOKEN_C23368396A>",
       "_id": "pii_token_vault_13",
       "pii_type": "UPI_VPA",
       "masked_preview": "sh***@okicici",
-      "created_at": "2026-10-31T13:29:34.732163+00:00"
+      "created_at": "2026-10-31T19:25:26.316807+00:00"
     },
     {
       "token": "<UPI_VPA_TOKEN_DDC1A91159>",
       "_id": "pii_token_vault_14",
       "pii_type": "UPI_VPA",
       "masked_preview": "us***@upi",
-      "created_at": "2026-10-31T13:29:34.757209+00:00"
+      "created_at": "2026-10-31T19:25:26.389537+00:00"
     },
     {
       "token": "<UPI_VPA_TOKEN_E3FCDDF50E>",
       "_id": "pii_token_vault_15",
       "pii_type": "UPI_VPA",
       "masked_preview": "su***@ybl",
-      "created_at": "2026-10-31T13:29:34.761724+00:00"
+      "created_at": "2026-10-31T19:25:26.402248+00:00"
     },
     {
       "token": "<UPI_VPA_TOKEN_33C6CA9802>",
       "_id": "pii_token_vault_16",
       "pii_type": "UPI_VPA",
       "masked_preview": "vi***@okaxis",
-      "created_at": "2026-10-31T13:29:34.787858+00:00"
+      "created_at": "2026-10-31T19:25:26.464491+00:00"
     },
     {
       "token": "<UPI_VPA_TOKEN_1A9BE25EB5>",
       "_id": "pii_token_vault_17",
       "pii_type": "UPI_VPA",
       "masked_preview": "ti***@upi",
-      "created_at": "2026-10-31T13:29:34.792422+00:00"
+      "created_at": "2026-10-31T19:25:26.475706+00:00"
     }
   ]
 }

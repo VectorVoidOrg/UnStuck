@@ -1,51 +1,62 @@
 # ============================================================================
-# 🛸 UFO (Unified Fraud Observer) — One-Command GCP Cloud Run Deployment Script
-# Deploys the backend to Google Cloud Run in `asia-south1` (Mumbai, India)
-# for RBI Data Localization Compliance & 24/7 availability without your PC on.
+# UFO (Unified Fraud Observer) - One-Command GCP Cloud Run Deployment Script
+# Deploys the backend to Google Cloud Run in asia-south1 (Mumbai, India)
 #
 # Usage:
-#   .\deploy_gcp_cloud_run.ps1 -ProjectId "your-gcp-project-id"
+#   .\deploy_gcp_cloud_run.ps1 -ProjectId "unstuck-vectorvoid"
 # ============================================================================
 param(
-    [Parameter(Mandatory=$true)]
-    [string]$ProjectId,
+    [Parameter(Mandatory=$false)]
+    [string]$ProjectId = "unstuck-vectorvoid",
     [string]$Region = "asia-south1",
     [string]$ServiceName = "ufo-backend"
 )
 
-Write-Host "🛸 Preparing GCP Cloud Run deployment for '$ServiceName' in $Region (Mumbai)..." -ForegroundColor Cyan
+Write-Host "[UFO] Preparing GCP Cloud Run deployment for '$ServiceName' in $Region (Mumbai)..." -ForegroundColor Cyan
 
-# Read keys from local .env if present
-$envVars = @{
-    "UFO_ENV" = "production"
-    "MAX_AUTO_REFUND_INR" = "5000.0"
-    "MAX_REASONING_LOOPS" = "3"
-    "UFO_FORCE_MONGO" = "false"
-}
+# Build YAML env file so MONGO_URI with special characters (?, &, =) passes cleanly to gcloud
+$envYamlLines = @(
+    'UFO_ENV: "production"',
+    'MAX_AUTO_REFUND_INR: "5000.0"',
+    'MAX_REASONING_LOOPS: "3"'
+)
+
+$allowedKeys = @(
+    "GEMINI_API_KEY",
+    "GROQ_API_KEY",
+    "MONGO_URI",
+    "MONGO_DB_NAME",
+    "UFO_FORCE_MONGO",
+    "FRONTIER_LLM_MODEL",
+    "GROQ_SLM_MODEL",
+    "PII_VAULT_SECRET_KEY"
+)
 
 if (Test-Path ".env") {
     Get-Content ".env" | ForEach-Object {
         $line = $_.Trim()
-        if ($line -and -not $line.StartsWith("#") -and $line.Contains("=")) {
-            $parts = $line.Split("=", 2)
-            $k = $parts[0].Trim()
-            $v = $parts[1].Trim()
-            if ($v -ne "" -and $k -in @("GEMINI_API_KEY", "GROQ_API_KEY", "MONGO_URI", "UFO_FORCE_MONGO", "FRONTIER_LLM_MODEL", "GROQ_SLM_MODEL", "PII_VAULT_SECRET_KEY")) {
-                $envVars[$k] = $v
+        if ($line -and (-not $line.StartsWith("#")) -and $line.Contains("=")) {
+            $idx = $line.IndexOf("=")
+            $k = $line.Substring(0, $idx).Trim()
+            $v = $line.Substring($idx + 1).Trim()
+            if (($v -ne "") -and ($allowedKeys -contains $k)) {
+                $escapedVal = $v.Replace('"', '\"')
+                $envYamlLines += "${k}: `"$escapedVal`""
             }
         }
     }
 }
 
-$envString = ($envVars.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join ","
+$envFile = ".cloudrun.env.yaml"
+$envYamlLines | Set-Content -Path $envFile -Encoding Ascii
 
-Write-Host "⚙️ Setting active GCP Project to: $ProjectId" -ForegroundColor Yellow
+Write-Host "[UFO] Setting active GCP Project to: $ProjectId" -ForegroundColor Yellow
 gcloud config set project $ProjectId
 
-Write-Host "🚀 Enabling Cloud Run & Cloud Build APIs..." -ForegroundColor Yellow
+Write-Host "[UFO] Enabling Cloud Run and Cloud Build APIs..." -ForegroundColor Yellow
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com
 
-Write-Host "📦 Building Dockerfile in the cloud & deploying to Cloud Run ($Region)..." -ForegroundColor Green
+Write-Host "[UFO] Building Dockerfile in the cloud and deploying to Cloud Run ($Region)..." -ForegroundColor Green
 gcloud run deploy $ServiceName `
     --source . `
     --region $Region `
@@ -56,6 +67,10 @@ gcloud run deploy $ServiceName `
     --cpu 1 `
     --min-instances 1 `
     --max-instances 5 `
-    --set-env-vars "$envString"
+    --env-vars-file $envFile
 
-Write-Host "✅ Deployment complete! Copy the Service URL above into your Android app's BASE_URL." -ForegroundColor Cyan
+if (Test-Path $envFile) {
+    Remove-Item $envFile -Force
+}
+
+Write-Host "[UFO] Deployment complete! Copy the Service URL above into your Android app BASE_URL." -ForegroundColor Cyan

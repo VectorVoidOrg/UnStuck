@@ -1,0 +1,11 @@
+.git
+.pytest_cache
+__pycache__
+*.pyc
+.venv
+venv
+frontend/
+docs/
+backend/data/upi_fraud_training_data.csv
+backend/data/ufo_slm_finetune_dataset.jsonl
+backend/fraud_model.pkl
