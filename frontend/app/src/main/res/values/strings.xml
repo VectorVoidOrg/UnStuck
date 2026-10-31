@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UFO Fraud Observer</string>
+    <string name="channel_critical_alerts">Critical Fraud Alerts</string>
+    <string name="channel_critical_alerts_desc">High-priority heads-up alerts intercepted prior to UPI PIN entry</string>
+    <string name="accessibility_service_description">UFO observes active UPI payment screens to evaluate payee risk and detect brand spoofing or collect traps before PIN entry.</string>
+</resources>
+
