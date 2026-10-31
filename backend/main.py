@@ -17,6 +17,7 @@ from app.db.mongo import (
     db,
     get_db_status,
     transactions_collection,
+    ledger_collection,
     rbi_guidelines_collection,
 )
 from app.layer1_gateway.reputation_service import update_history, update_reputation
@@ -148,7 +149,10 @@ def predict(data: TransactionRequest) -> Dict[str, Any]:
     # Record anonymized transaction telemetry
     redacted_user, _ = pii_vault.redact_text(data.user_id)
     redacted_receiver, _ = pii_vault.redact_text(data.receiver)
+    utr_num = data.utr_number or f"4{abs(hash((data.user_id, data.receiver, data.amount, datetime.now(timezone.utc).isoformat()))) % 10**11:011d}"
+
     transactions_collection.insert_one({
+        "utr_number": utr_num,
         "user_token": redacted_user,
         "receiver_token": redacted_receiver,
         "amount": data.amount,
@@ -159,6 +163,25 @@ def predict(data: TransactionRequest) -> Dict[str, Any]:
         "latency_ms": eval_res["latency_ms"],
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
+
+    # If payment was not hard-blocked at the gateway, record its UTR in `npci_ledger`
+    # so any future dispute can verify this UTR against our database ledger!
+    if eval_res["decision_action"] != "BLOCK_SCAM":
+        ledger_collection.update_one(
+            {"utr_number": utr_num},
+            {
+                "$set": {
+                    "utr_number": utr_num,
+                    "payer_vpa": redacted_user,
+                    "payee_vpa": redacted_receiver,
+                    "amount": data.amount,
+                    "status": "SETTLED",
+                    "verified_in_npci": True,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                }
+            },
+            upsert=True,
+        )
 
     return {
         "risk": round(risk, 2),
@@ -296,6 +319,13 @@ def get_hall_of_shame() -> Dict[str, Any]:
 def list_rbi_guidelines() -> Dict[str, Any]:
     docs = list(rbi_guidelines_collection.find({}, {"_id": 0}))
     return {"count": len(docs), "guidelines": docs}
+
+
+@app.get("/ledger")
+def list_npci_ledger(limit: int = Query(default=25, ge=1, le=200)) -> Dict[str, Any]:
+    """Lists settled 12-digit UTR records in the `npci_ledger` collection used to verify receipts."""
+    docs = list(ledger_collection.find({}, {"_id": 0}).limit(limit))
+    return {"count": len(docs), "ledger_entries": docs}
 
 
 @app.get("/audit/logs")

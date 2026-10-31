@@ -1,6 +1,7 @@
 import time
 from typing import Any, Dict, List, Tuple
 from app.layer1_gateway.reputation_service import (
+    check_deceptive_vpa_pattern,
     get_reputation_score,
     is_blacklisted,
     is_new_receiver,
@@ -84,6 +85,11 @@ def evaluate_transaction_sync(data: Dict[str, Any]) -> Dict[str, Any]:
     # 3. DETERMINISTIC RULE ENGINE
     rule_risk = 0.0
     reasons: List[str] = []
+
+    is_deceptive_vpa, deceptive_reason = check_deceptive_vpa_pattern(receiver)
+    if is_deceptive_vpa and deceptive_reason:
+        rule_risk += 0.65
+        reasons.append(deceptive_reason)
 
     if new_receiver and high_amount and fast_action:
         rule_risk += 0.8
