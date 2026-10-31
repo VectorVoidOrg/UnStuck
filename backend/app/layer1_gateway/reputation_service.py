@@ -1,11 +1,34 @@
+import re
 from datetime import datetime, timezone
-from typing import Any, Dict
+from typing import Any, Dict, Optional, Tuple
 from app.db.mongo import (
     user_collection,
     receiver_collection,
     hall_collection,
     audit_logs_collection,
 )
+
+# Deceptive VPA Impersonation Patterns from MHA I4C (`cybercrime.gov.in`) & Police Advisories
+SUSPICIOUS_VPA_REGEX = re.compile(
+    r"(?:cbi\.|ed\.|ncb\.|customs|digitalarrest|supremecourt|cyber\.police|"
+    r"kyc\.|pan\.link|account\.unblock|ebill|disconnect|bescom|mseb|bses|"
+    r"indianarmy|cisf\.|anydesk|teamviewer|customercare|refund\.desk|"
+    r"pmkisan|incometax\.tds|lottery|cashback|telegram\.vip)",
+    re.IGNORECASE,
+)
+
+
+def check_deceptive_vpa_pattern(receiver: str) -> Tuple[bool, Optional[str]]:
+    """
+    Detects zero-day deceptive UPI VPA handles impersonating government agencies,
+    police/CBI, banks (KYC), electricity boards, or customer care helplines.
+    """
+    if not receiver:
+        return False, None
+    match = SUSPICIOUS_VPA_REGEX.search(receiver)
+    if match:
+        return True, f"Deceptive UPI handle impersonation pattern detected ('{match.group(0)}')"
+    return False, None
 
 
 def is_new_receiver(user_id: str, receiver: str) -> bool:
@@ -91,6 +114,10 @@ def get_reputation_score(receiver: str) -> float:
     """Returns a normalized [0.0, 1.0] risk reputation score for the receiver VPA."""
     if is_blacklisted(receiver):
         return 1.0
+
+    is_deceptive, _ = check_deceptive_vpa_pattern(receiver)
+    if is_deceptive:
+        return 0.85
 
     data = receiver_collection.find_one({"receiver": receiver})
     if not data or not data.get("transactions"):
