@@ -31,28 +31,37 @@ class SLMEngine:
         """
         provider = settings.SLM_PROVIDER.lower()
 
-        # 1. Try Groq fast SLM if configured
+        # 1. Try Groq fast SLM if configured (via httpx REST or groq SDK)
         if provider in ("auto", "groq") and settings.GROQ_API_KEY:
             try:
-                from groq import Groq
+                import httpx
 
-                client = Groq(api_key=settings.GROQ_API_KEY)
-                resp = client.chat.completions.create(
-                    model=settings.GROQ_SLM_MODEL,
-                    messages=[
-                        {"role": "system", "content": self.SYSTEM_PROMPT},
-                        {
-                            "role": "user",
-                            "content": f"Amount: ₹{amount_inr}\nMetadata: {json.dumps(metadata)}\nContext: {redacted_context}",
-                        },
-                    ],
-                    response_format={"type": "json_object"},
-                    temperature=0.1,
-                    max_tokens=450,
+                resp = httpx.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {settings.GROQ_API_KEY}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "model": settings.GROQ_SLM_MODEL,
+                        "messages": [
+                            {"role": "system", "content": self.SYSTEM_PROMPT},
+                            {
+                                "role": "user",
+                                "content": f"Amount: ₹{amount_inr}\nMetadata: {json.dumps(metadata)}\nContext: {redacted_context}",
+                            },
+                        ],
+                        "response_format": {"type": "json_object"},
+                        "temperature": 0.1,
+                        "max_tokens": 450,
+                    },
+                    timeout=5.0,
                 )
-                raw_json = json.loads(resp.choices[0].message.content)
-                tokens = getattr(resp.usage, "total_tokens", 320)
-                return AgentVerdictSchema(**raw_json), int(tokens), f"groq/{settings.GROQ_SLM_MODEL}"
+                if resp.status_code == 200:
+                    body = resp.json()
+                    raw_json = json.loads(body["choices"][0]["message"]["content"])
+                    tokens = body.get("usage", {}).get("total_tokens", 320)
+                    return AgentVerdictSchema(**raw_json), int(tokens), f"groq/{settings.GROQ_SLM_MODEL}"
             except Exception:
                 pass
 

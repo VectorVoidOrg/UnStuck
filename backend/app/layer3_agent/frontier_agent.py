@@ -92,37 +92,44 @@ class FrontierRAGAgent:
         loops_used += 1
         total_tokens += 650
 
-        # Attempt live Gemini API call if key is configured and network is available
+        # Attempt live Gemini REST API call if key is configured and network is available
         if settings.GEMINI_API_KEY and not settings.GEMINI_API_KEY.startswith("AQ."):
             try:
-                from google import genai
-                from google.genai import types
+                import httpx
 
-                client = genai.Client(api_key=settings.GEMINI_API_KEY)
                 prompt = (
                     f"You are UFO Frontier Fraud Investigator grounded in RBI & NPCI regulations.\n"
                     f"Retrieved RBI Circulars:\n{rag_context_str}\n\n"
                     f"Disputed Amount: ₹{amount_inr}\n"
                     f"UTR Verified in NPCI Ledger: {utr_verified_in_ledger}\n"
                     f"PII-Redacted Dispute & OCR Context:\n{redacted_context}\n\n"
-                    f"Return a JSON object matching AgentVerdictSchema."
+                    f"Return ONLY a JSON object with keys: is_scam (bool), scam_category (str), "
+                    f"confidence (float 0..1), recommended_action (ALLOW_PAYMENT|WARN_USER|BLOCK_SCAM|PLACE_LIEN|AUTO_REFUND|ESCALATE_TO_HITL), "
+                    f"recommended_refund_inr (float), place_lien (bool), rbi_circular_citations (list of str), reasoning_summary (str)."
                 )
-                response = client.models.generate_content(
-                    model=settings.FRONTIER_LLM_MODEL,
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        response_mime_type="application/json",
-                        response_schema=AgentVerdictSchema,
-                        temperature=0.1,
-                    ),
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{settings.FRONTIER_LLM_MODEL}:generateContent?key={settings.GEMINI_API_KEY}"
+                resp = httpx.post(
+                    url,
+                    json={
+                        "contents": [{"parts": [{"text": prompt}]}],
+                        "generationConfig": {
+                            "responseMimeType": "application/json",
+                            "temperature": 0.1,
+                        },
+                    },
+                    timeout=8.0,
                 )
-                parsed = json.loads(response.text)
-                return (
-                    AgentVerdictSchema(**parsed),
-                    loops_used,
-                    total_tokens,
-                    f"gemini/{settings.FRONTIER_LLM_MODEL}+rbi-rag",
-                )
+                if resp.status_code == 200:
+                    candidates = resp.json().get("candidates", [])
+                    if candidates:
+                        text_out = candidates[0]["content"]["parts"][0]["text"]
+                        parsed = json.loads(text_out)
+                        return (
+                            AgentVerdictSchema(**parsed),
+                            loops_used,
+                            total_tokens,
+                            f"gemini/{settings.FRONTIER_LLM_MODEL}+rbi-rag",
+                        )
             except Exception:
                 pass
 

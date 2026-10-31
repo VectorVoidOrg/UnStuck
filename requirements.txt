@@ -5,5 +5,3 @@ python-dotenv>=1.0.0
 python-multipart>=0.0.20
 httpx>=0.28.0
 pymongo>=4.10.0
-google-genai>=1.0.0
-groq>=0.30.0

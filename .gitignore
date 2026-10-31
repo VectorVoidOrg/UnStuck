@@ -28,3 +28,4 @@ build/
 captures/
 .externalNativeBuild/
 .cxx/
+.vercel
