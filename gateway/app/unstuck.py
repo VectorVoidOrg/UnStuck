@@ -168,6 +168,20 @@ async def extract_receipt(
         except Exception as e:
             logger.warning(f"Gemini API call failed: {e}")
 
+    # 4.5. Attempt Upstream Deployed Unstuck Backend if configured
+    if not extracted_data and getattr(settings, "UNSTUCK_BASE_URL", None):
+        try:
+            import httpx
+            target_url = f"{settings.UNSTUCK_BASE_URL.rstrip('/')}/extract"
+            files = {"file": ("upload.png", clean_bytes, "image/png")}
+            async with httpx.AsyncClient(timeout=10.0) as http_client:
+                resp = await http_client.post(target_url, files=files)
+                if resp.status_code == 200:
+                    resp_json = resp.json()
+                    extracted_data = resp_json.get("transaction") or resp_json
+        except Exception as e:
+            logger.warning(f"Upstream Unstuck call failed: {e}")
+
     # 5. Deterministic Fixture / Heuristic Fallback
     if not extracted_data:
         # Check bundled demo fixture hashes or return high-confidence synthetic extraction

@@ -8,6 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 class Settings(BaseSettings):
     UPSTREAM_BASE_URL: str = "https://temporary-snappy-maple-v2pe7o5-n4c5fhzfe-anon-delta-flame.vercel.app"
+    UNSTUCK_BASE_URL: str = "https://temporary-rapid-walnut-8b8urq6-erhjg3k0f-anon-mu-indol.vercel.app"
     UPSTREAM_API_KEY: Optional[str] = None
     FREE_PREVENTION_LIMIT: int = 100
     FREE_UNSTUCK_LIMIT: int = 5

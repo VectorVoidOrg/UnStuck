@@ -358,19 +358,62 @@ fun PreventionScreenContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "Live Test & Demonstration",
+                    text = "Live Test & Custom Amount Verification",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = UfoTextPrimary
                 )
 
                 Text(
-                    text = "Trigger real-time Truecaller heads-up notifications with synthetic payment requests:",
+                    text = "Enter any custom payment amount and UPI ID to trigger the exact heads-up risk popup:",
                     style = MaterialTheme.typography.bodySmall,
                     color = UfoTextSecondary
+                )
+
+                var testVpa by remember { mutableStateOf("prize.winner99@ybl") }
+                var testAmountStr by remember { mutableStateOf("1500") }
+
+                OutlinedTextField(
+                    value = testVpa,
+                    onValueChange = { testVpa = it },
+                    label = { Text("Receiver VPA (UPI ID)", fontSize = 12.sp) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
+
+                OutlinedTextField(
+                    value = testAmountStr,
+                    onValueChange = { testAmountStr = it },
+                    label = { Text("Payment Amount (₹)", fontSize = 12.sp) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
+
+                Button(
+                    onClick = {
+                        val parsed = testAmountStr.replace("₹", "").replace(",", "").trim().toDoubleOrNull() ?: 1500.0
+                        onSimulateCheck(testVpa.ifBlank { "test.receiver@upi" }, parsed, true)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = UfoPrimaryIndigo)
+                ) {
+                    val previewAmt = testAmountStr.replace("₹", "").replace(",", "").trim()
+                    Text("Trigger Popup with ₹" + (if (previewAmt.isNotBlank()) previewAmt else "0"), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                }
+
+                HorizontalDivider(color = UfoBorder.copy(alpha = 0.5f))
+
+                Text(
+                    text = "Or fill with quick presets:",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = UfoTextSecondary,
+                    fontSize = 11.sp
                 )
 
                 Row(
@@ -378,36 +421,48 @@ fun PreventionScreenContent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     OutlinedButton(
-                        onClick = { onSimulateCheck("swiggy@icici", 250.0, false) },
+                        onClick = {
+                            testVpa = "swiggy@icici"
+                            testAmountStr = "250"
+                            onSimulateCheck("swiggy@icici", 250.0, false)
+                        },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = UfoSafeCheck)
                     ) {
-                        Text("Safe", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("Safe ₹250", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
 
                     OutlinedButton(
-                        onClick = { onSimulateCheck("prize.winner99@ybl", 5000.0, true) },
+                        onClick = {
+                            testVpa = "prize.winner99@ybl"
+                            testAmountStr = "5000"
+                            onSimulateCheck("prize.winner99@ybl", 5000.0, true)
+                        },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = UfoWarnText)
                     ) {
-                        Text("Warning", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("Warn ₹5k", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
 
                     OutlinedButton(
-                        onClick = { onSimulateCheck("cbi.digitalarrest@ybl", 50000.0, true) },
+                        onClick = {
+                            testVpa = "cbi.digitalarrest@ybl"
+                            testAmountStr = "50000"
+                            onSimulateCheck("cbi.digitalarrest@ybl", 50000.0, true)
+                        },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = UfoDangerText)
                     ) {
-                        Text("Scam", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("Scam ₹50k", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
         }
 
-        UfoDisclosure(bloomEntries = uiState.bloomFilterEntries)
+                UfoDisclosure(bloomEntries = uiState.bloomFilterEntries)
     }
 }
 
@@ -478,3 +533,21 @@ fun UfoBottomNav(
         }
     }
 }
+
+@Composable
+fun UfoDisclosure(bloomEntries: Int) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Protected by UFO Bloom Filter ($bloomEntries blacklisted signatures active)",
+            fontSize = 11.sp,
+            color = Color.Gray,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+

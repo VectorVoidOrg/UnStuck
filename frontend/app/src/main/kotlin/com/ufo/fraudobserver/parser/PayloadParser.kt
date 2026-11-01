@@ -25,6 +25,11 @@ object PayloadParser {
         Pattern.CASE_INSENSITIVE
     )
 
+    private val EXCLUDE_WORDS = listOf(
+        "balance", "bal", "available", "limit", "cashback", "reward", "voucher",
+        "off", "save", "saving", "upto", "up to", "ending", "a/c", "account", "rate"
+    )
+
     private val COLLECT_KEYWORDS = listOf(
         "requested", "collect", "pay", "mandate", "autopay", "decline"
     )
@@ -44,16 +49,35 @@ object PayloadParser {
 
     /**
      * Extracts Amount from arbitrary string text.
+     * Guaranteed to ignore balances, limits, and promotional cashbacks.
      */
     fun extractAmount(text: CharSequence?): Double? {
         if (text.isNullOrBlank()) return null
-        val matcher = AMOUNT_PATTERN.matcher(text)
-        return if (matcher.find()) {
+        val str = text.toString()
+        val lower = str.lowercase()
+
+        // Ignore account balance or reward strings
+        if (EXCLUDE_WORDS.any { lower.contains(it) }) return null
+
+        val matcher = AMOUNT_PATTERN.matcher(str)
+        if (matcher.find()) {
             val amountStr = matcher.group(1)?.replace(",", "")
-            amountStr?.toDoubleOrNull()
-        } else {
-            null
+            val parsed = amountStr?.toDoubleOrNull()
+            if (parsed != null && parsed in 0.5..1000000.0 && amountStr.length !in listOf(10, 12)) {
+                return parsed
+            }
         }
+
+        // Support plain numeric amounts entered in input fields (e.g. "500", "500.00", "1,500")
+        val clean = str.replace("₹", "").replace("Rs.", "").replace("Rs", "").replace("INR", "").replace(",", "").trim()
+        val pureNumber = clean.toDoubleOrNull()
+        if (pureNumber != null && pureNumber in 1.0..1000000.0 && clean.length !in listOf(10, 12) && !clean.startsWith("0")) {
+            if (str.contains("₹") || str.contains("Rs", ignoreCase = true) || str.contains("INR", ignoreCase = true) || clean.matches(Regex("""^\d{1,6}(?:\.\d{1,2})?$"""))) {
+                return pureNumber
+            }
+        }
+
+        return null
     }
 
     /**
@@ -108,9 +132,13 @@ object PayloadParser {
 
         val textCollector = StringBuilder()
         var extractedVpa: String? = null
-        var extractedAmount: Double? = null
         var isCollect = false
         var candidatePayeeName: String? = null
+
+        var editableEnteredAmount: Double? = null
+        var explicitAmountWithSymbol: Double? = null
+        var nearbyNumericAmount: Double? = null
+        var sawCurrencySymbol = false
 
         var nodeCount = 0
         val maxNodes = 250 // Hard limit to avoid deep traversal stalls
@@ -138,13 +166,39 @@ object PayloadParser {
                     return null
                 }
 
+                // Priority 1: Check if this node is an editable amount field where user enters the amount
+                val isEditable = node.isEditable || node.className?.contains("EditText", ignoreCase = true) == true
+                if (isEditable) {
+                    val rawInput = (nodeText ?: contentDesc)?.trim()
+                    if (!rawInput.isNullOrBlank()) {
+                        val clean = rawInput.replace("₹", "").replace("Rs.", "").replace("Rs", "").replace("INR", "").replace(",", "").trim()
+                        val parsed = clean.toDoubleOrNull()
+                        if (parsed != null && parsed in 0.5..1000000.0 && clean.length !in listOf(10, 12)) {
+                            editableEnteredAmount = parsed
+                        }
+                    }
+                }
+
+                // Priority 2: Check for currency symbol adjacent to numeric text
+                val rawTrimmed = (nodeText ?: contentDesc)?.trim() ?: ""
+                if (rawTrimmed in listOf("₹", "Rs.", "Rs", "INR")) {
+                    sawCurrencySymbol = true
+                } else if (sawCurrencySymbol && nearbyNumericAmount == null && rawTrimmed.isNotBlank()) {
+                    val clean = rawTrimmed.replace(",", "").trim()
+                    val parsed = clean.toDoubleOrNull()
+                    if (parsed != null && parsed in 1.0..1000000.0 && clean.length !in listOf(10, 12)) {
+                        nearbyNumericAmount = parsed
+                        sawCurrencySymbol = false
+                    }
+                }
+
                 if (!nodeText.isNullOrBlank()) {
                     textCollector.append(nodeText).append(" ")
                     if (extractedVpa == null) {
                         extractedVpa = extractVpa(nodeText)
                     }
-                    if (extractedAmount == null) {
-                        extractedAmount = extractAmount(nodeText)
+                    if (explicitAmountWithSymbol == null) {
+                        explicitAmountWithSymbol = extractAmount(nodeText)
                     }
                     if (!isCollect && isCollectRequest(nodeText)) {
                         isCollect = true
@@ -159,8 +213,8 @@ object PayloadParser {
                     if (extractedVpa == null) {
                         extractedVpa = extractVpa(contentDesc)
                     }
-                    if (extractedAmount == null) {
-                        extractedAmount = extractAmount(contentDesc)
+                    if (explicitAmountWithSymbol == null) {
+                        explicitAmountWithSymbol = extractAmount(contentDesc)
                     }
                     if (!isCollect && isCollectRequest(contentDesc)) {
                         isCollect = true
@@ -184,15 +238,19 @@ object PayloadParser {
         if (extractedVpa == null) {
             extractedVpa = extractVpa(rawDump)
         }
-        if (extractedAmount == null) {
-            extractedAmount = extractAmount(rawDump)
-        }
+
+        // Final Amount Resolution:
+        // 1. If user typed an amount into an editable field, THAT is 100% the amount they entered.
+        // 2. Otherwise use explicit currency symbol amount from payment details.
+        // 3. Otherwise use nearby numeric view adjacent to currency symbol.
+        // 4. Fallback to raw dump regex.
+        val finalAmount = editableEnteredAmount ?: explicitAmountWithSymbol ?: nearbyNumericAmount ?: extractAmount(rawDump)
 
         return if (extractedVpa != null || isCollect) {
             ParsedPaymentPayload(
                 vpa = extractedVpa,
                 payeeName = candidatePayeeName,
-                amount = extractedAmount,
+                amount = finalAmount,
                 isCollectRequest = isCollect,
                 rawTextDump = rawDump
             )

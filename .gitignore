@@ -32,3 +32,6 @@ venv/
 # Merged Archives
 _archive_unstuck_subparted/
 Unstuck_subpart/
+
+.gradle_home/
+**/.gradle_home/
