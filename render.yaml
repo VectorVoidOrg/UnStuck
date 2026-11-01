@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ufo-fraud-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: UFO_FORCE_MONGO
+        value: "false"
+      - key: MAX_AUTO_REFUND_INR
+        value: "5000.0"
+      - key: MAX_REASONING_LOOPS
+        value: "3"

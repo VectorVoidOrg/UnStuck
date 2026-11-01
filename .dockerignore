@@ -1,0 +1,11 @@
+.git
+.gitignore
+.pytest_cache
+__pycache__
+*.pyc
+.venv
+venv
+.env
+.cloudrun.env.yaml
+frontend/
+docs/

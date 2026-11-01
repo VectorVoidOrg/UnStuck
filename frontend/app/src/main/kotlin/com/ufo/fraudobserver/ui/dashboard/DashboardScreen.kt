@@ -406,6 +406,8 @@ fun PreventionScreenContent(
                 }
             }
         }
+
+        UfoDisclosure(bloomEntries = uiState.bloomFilterEntries)
     }
 }
 

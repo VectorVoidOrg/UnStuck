@@ -1,0 +1,15 @@
+.git
+.idea
+__pycache__
+*.pyc
+.venv
+venv
+_uv
+.vercel
+frontend
+docs
+backend/fraud_model.pkl
+backend/data/upi_fraud_training_data.csv
+backend/data/ufo_slm_finetune_dataset.jsonl
+backend/scripts
+backend/tests

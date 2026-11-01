@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufo.fraudobserver.data.local.FlaggedTransactionEntity
+import com.ufo.fraudobserver.data.local.WhitelistedVpaEntity
 import com.ufo.fraudobserver.data.repository.FraudRepository
 import com.ufo.fraudobserver.engine.BloomFilterEngine
 import com.ufo.fraudobserver.engine.RiskEvaluationResult
@@ -57,6 +58,13 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     val flaggedTransactions: StateFlow<List<FlaggedTransactionEntity>> =
         repository.flaggedTransactions.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList()
+        )
+
+    val whitelistedVpas: StateFlow<List<WhitelistedVpaEntity>> =
+        repository.whitelistedVpas.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
             emptyList()
