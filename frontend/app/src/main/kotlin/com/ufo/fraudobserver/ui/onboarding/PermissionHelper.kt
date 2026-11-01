@@ -12,7 +12,6 @@ import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import androidx.core.content.ContextCompat
 import com.ufo.fraudobserver.services.UfoAccessibilityService
-import com.ufo.fraudobserver.services.UfoNotificationService
 
 object PermissionHelper {
 
@@ -26,13 +25,6 @@ object PermissionHelper {
         }
     }
 
-    fun isNotificationListenerEnabled(context: Context): Boolean {
-        val flat = Settings.Secure.getString(context.contentResolver, "enabled_notification_listeners")
-        if (flat.isNullOrBlank()) return false
-        val expected = ComponentName(context, UfoNotificationService::class.java).flattenToString()
-        return flat.contains(expected)
-    }
-
     fun hasPostNotificationsPermission(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(
@@ -44,13 +36,6 @@ object PermissionHelper {
         }
     }
 
-    fun hasPhoneStatePermission(context: Context): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            android.Manifest.permission.READ_PHONE_STATE
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-
     fun isBatteryOptimizationIgnored(context: Context): Boolean {
         val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager ?: return true
         return pm.isIgnoringBatteryOptimizations(context.packageName)
@@ -58,20 +43,11 @@ object PermissionHelper {
 
     fun areCriticalPermissionsGranted(context: Context): Boolean {
         return isAccessibilityServiceEnabled(context) &&
-                isNotificationListenerEnabled(context) &&
-                hasPostNotificationsPermission(context) &&
-                hasPhoneStatePermission(context)
+                hasPostNotificationsPermission(context)
     }
 
     fun openAccessibilitySettings(context: Context) {
         val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        }
-        context.startActivity(intent)
-    }
-
-    fun openNotificationListenerSettings(context: Context) {
-        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         context.startActivity(intent)

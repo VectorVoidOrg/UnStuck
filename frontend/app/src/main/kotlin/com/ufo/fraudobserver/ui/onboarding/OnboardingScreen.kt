@@ -32,30 +32,25 @@ fun OnboardingScreen(
     val context = LocalContext.current
 
     var isAccessibilityEnabled by remember { mutableStateOf(PermissionHelper.isAccessibilityServiceEnabled(context)) }
-    var isNotificationListenerEnabled by remember { mutableStateOf(PermissionHelper.isNotificationListenerEnabled(context)) }
     var hasPostNotification by remember { mutableStateOf(PermissionHelper.hasPostNotificationsPermission(context)) }
-    var hasPhoneState by remember { mutableStateOf(PermissionHelper.hasPhoneStatePermission(context)) }
     var isBatteryOptimized by remember { mutableStateOf(PermissionHelper.isBatteryOptimizationIgnored(context)) }
 
     // Re-check permissions when returning from system settings
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         isAccessibilityEnabled = PermissionHelper.isAccessibilityServiceEnabled(context)
-        isNotificationListenerEnabled = PermissionHelper.isNotificationListenerEnabled(context)
         hasPostNotification = PermissionHelper.hasPostNotificationsPermission(context)
-        hasPhoneState = PermissionHelper.hasPhoneStatePermission(context)
         isBatteryOptimized = PermissionHelper.isBatteryOptimizationIgnored(context)
     }
 
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        hasPhoneState = permissions[android.Manifest.permission.READ_PHONE_STATE] ?: hasPhoneState
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             hasPostNotification = permissions[android.Manifest.permission.POST_NOTIFICATIONS] ?: hasPostNotification
         }
     }
 
-    val allCriticalReady = isAccessibilityEnabled && isNotificationListenerEnabled && hasPhoneState && hasPostNotification
+    val allCriticalReady = isAccessibilityEnabled && hasPostNotification
 
     Column(
         modifier = Modifier
@@ -134,36 +129,22 @@ fun OnboardingScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 2. Notification Listener Card
+        // 2. Heads-Up Notification Permission
         PermissionCard(
-            title = "Notification Collect Ingestion",
-            description = "Intercepts incoming UPI collect requests from Google Pay, PhonePe, Paytm, etc. before opening app.",
-            isGranted = isNotificationListenerEnabled,
-            actionLabel = "Enable Notification Access",
-            onAction = { PermissionHelper.openNotificationListenerSettings(context) }
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // 3. Runtime Permissions (Phone State & Post Notifications)
-        val runtimeGranted = hasPhoneState && hasPostNotification
-        PermissionCard(
-            title = "Live Call & Heads-Up Alerts",
-            description = "Detects active phone calls (vishing scam telemetry) and displays high-priority heads-up interventions.",
-            isGranted = runtimeGranted,
-            actionLabel = "Grant Telephony & Alerts",
+            title = "Heads-Up Scam Alerts",
+            description = "Displays instant Truecaller-style high-priority warning notifications when a payment destination is suspicious.",
+            isGranted = hasPostNotification,
+            actionLabel = "Grant Notification Access",
             onAction = {
-                val perms = mutableListOf(android.Manifest.permission.READ_PHONE_STATE)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    perms.add(android.Manifest.permission.POST_NOTIFICATIONS)
+                    requestPermissionLauncher.launch(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS))
                 }
-                requestPermissionLauncher.launch(perms.toTypedArray())
             }
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 4. Battery Optimization
+        // 3. Battery Optimization
         PermissionCard(
             title = "Battery Optimization Exemption",
             description = "Prevents aggressive OEM battery killers (MIUI, OneUI) from terminating protection listeners.",

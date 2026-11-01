@@ -66,6 +66,19 @@ object PayloadParser {
     }
 
     /**
+     * Hard constraint: Detects UPI PIN input screens to abort reading.
+     */
+    fun isPinScreen(text: CharSequence?): Boolean {
+        if (text.isNullOrBlank()) return false
+        val lower = text.toString().lowercase()
+        return lower.contains("enter upi pin") ||
+               lower.contains("enter 4-digit") ||
+               lower.contains("enter 6-digit") ||
+               lower.contains("upi pin") ||
+               lower.contains("enter mpim")
+    }
+
+    /**
      * Parses notification content.
      */
     fun parseNotification(title: CharSequence?, text: CharSequence?): ParsedPaymentPayload {
@@ -107,6 +120,11 @@ object PayloadParser {
                 val node = queue.poll() ?: continue
                 nodeCount++
 
+                // Hard constraint: Skip all password and PIN nodes
+                if (node.isPassword) {
+                    continue
+                }
+
                 // Ignore invisible nodes to prevent false matches from hidden view hierarchies
                 if (!node.isVisibleToUser) {
                     continue
@@ -114,6 +132,11 @@ object PayloadParser {
 
                 val nodeText = node.text?.toString()
                 val contentDesc = node.contentDescription?.toString()
+
+                // Hard constraint: Do nothing on the PIN screen
+                if (isPinScreen(nodeText) || isPinScreen(contentDesc)) {
+                    return null
+                }
 
                 if (!nodeText.isNullOrBlank()) {
                     textCollector.append(nodeText).append(" ")

@@ -186,6 +186,7 @@ fun UnstuckScannerScreen(
                 Text(
                     text = "Parse & Compute Compensation →",
                     style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
             }

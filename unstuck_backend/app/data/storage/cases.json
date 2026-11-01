@@ -1,0 +1,314 @@
+[
+  {
+    "id": "960538fe-759d-4073-a931-9f44f40470c2",
+    "created_at": "2026-10-31T12:32:21.343775",
+    "updated_at": "2026-10-31T12:32:21.382600",
+    "transaction": {
+      "amount": 1500.0,
+      "reference": "428912345678",
+      "bank": "HDFC Bank",
+      "date": "2026-10-15 00:00:00",
+      "rail": "UPI",
+      "status": "DEBITED",
+      "customer_name": "Account Holder",
+      "customer_email": "customer@example.com",
+      "customer_phone": "9876543210",
+      "account_number": "XX1234"
+    },
+    "rule_id": "upi_p2p_failed",
+    "customer_role": "Remitter",
+    "money_returned": true,
+    "reversal_date": "2026-10-24T12:00:00",
+    "evaluation": {
+      "deadline_date": "2026-10-16T00:00:00",
+      "tat_days": 1,
+      "day_type": "calendar",
+      "status": "REVERSED_LATE",
+      "days_late": 8,
+      "penalty_amount": 800.0,
+      "responsible_party": "Beneficiary Bank / Remitter Bank",
+      "circular_reference": "RBI Circular DPSS.CO.PD No.629/02.01.014/2019-20 (Harmonisation Circular Item 5(a))",
+      "rule_id": "upi_p2p_failed"
+    },
+    "events": [
+      {
+        "id": "d9ab8c17-888b-400b-b81c-d1e75e437393",
+        "case_id": "960538fe-759d-4073-a931-9f44f40470c2",
+        "timestamp": "2026-10-31T12:32:21.343775",
+        "type": "TRANSACTION",
+        "description": "Case opened for failed UPI payment of Rs. 1,500.00.",
+        "details": {
+          "reference": "428912345678",
+          "bank": "HDFC Bank"
+        }
+      },
+      {
+        "id": "acea21d0-45f7-408f-95d0-4398bc9ed522",
+        "case_id": "960538fe-759d-4073-a931-9f44f40470c2",
+        "timestamp": "2026-10-31T12:32:21.353530",
+        "type": "BANK_COMPLAINT",
+        "description": "Generated Bank Complaint letter.",
+        "details": {
+          "level": "bank_complaint",
+          "generated_by": "template"
+        }
+      },
+      {
+        "id": "6585edbf-7b4a-4e34-a0b1-c12a4ea1a3b5",
+        "case_id": "960538fe-759d-4073-a931-9f44f40470c2",
+        "timestamp": "2026-10-31T12:32:21.377373",
+        "type": "OMBUDSMAN_PACK",
+        "description": "Generated full RBI Ombudsman Dossier PDF pack.",
+        "details": {
+          "reference": "428912345678"
+        }
+      },
+      {
+        "id": "bf3f56ed-a7b1-4d20-b4df-0640aac1b338",
+        "case_id": "960538fe-759d-4073-a931-9f44f40470c2",
+        "timestamp": "2026-10-24T12:00:00",
+        "type": "REVERSAL",
+        "description": "Money successfully reversed / credited to account.",
+        "details": {
+          "reversal_date": "2026-10-24 12:00:00"
+        }
+      }
+    ],
+    "ticket_number": null,
+    "notes": null
+  },
+  {
+    "id": "3fccb880-a81f-414e-861e-616fc8784dcd",
+    "created_at": "2026-10-31T18:02:34.457186",
+    "updated_at": "2026-10-31T18:02:34.493436",
+    "transaction": {
+      "amount": 1500.0,
+      "reference": "428912345678",
+      "bank": "HDFC Bank",
+      "date": "2026-10-15 00:00:00",
+      "rail": "UPI",
+      "status": "DEBITED",
+      "customer_name": "Account Holder",
+      "customer_email": "customer@example.com",
+      "customer_phone": "9876543210",
+      "account_number": "XX1234"
+    },
+    "rule_id": "upi_p2p_failed",
+    "customer_role": "Remitter",
+    "money_returned": true,
+    "reversal_date": "2026-10-24T12:00:00",
+    "evaluation": {
+      "deadline_date": "2026-10-16T00:00:00",
+      "tat_days": 1,
+      "day_type": "calendar",
+      "status": "REVERSED_LATE",
+      "days_late": 8,
+      "penalty_amount": 800.0,
+      "responsible_party": "Beneficiary Bank / Remitter Bank",
+      "circular_reference": "RBI Circular DPSS.CO.PD No.629/02.01.014/2019-20 (Harmonisation Circular Item 5(a))",
+      "rule_id": "upi_p2p_failed"
+    },
+    "events": [
+      {
+        "id": "8e288cc7-2a65-4182-9ed2-b69be646416f",
+        "case_id": "3fccb880-a81f-414e-861e-616fc8784dcd",
+        "timestamp": "2026-10-31T18:02:34.457186",
+        "type": "TRANSACTION",
+        "description": "Case opened for failed UPI payment of Rs. 1,500.00.",
+        "details": {
+          "reference": "428912345678",
+          "bank": "HDFC Bank"
+        }
+      },
+      {
+        "id": "7e2bac72-979d-4ab7-b0ce-cf52f364fb26",
+        "case_id": "3fccb880-a81f-414e-861e-616fc8784dcd",
+        "timestamp": "2026-10-31T18:02:34.464294",
+        "type": "BANK_COMPLAINT",
+        "description": "Generated Bank Complaint letter.",
+        "details": {
+          "level": "bank_complaint",
+          "generated_by": "template"
+        }
+      },
+      {
+        "id": "2506a0be-50d4-4eae-97b8-a0448de67f9b",
+        "case_id": "3fccb880-a81f-414e-861e-616fc8784dcd",
+        "timestamp": "2026-10-31T18:02:34.489489",
+        "type": "OMBUDSMAN_PACK",
+        "description": "Generated full RBI Ombudsman Dossier PDF pack.",
+        "details": {
+          "reference": "428912345678"
+        }
+      },
+      {
+        "id": "8fcd3267-2d6b-4fa0-9cf5-75144ef7a768",
+        "case_id": "3fccb880-a81f-414e-861e-616fc8784dcd",
+        "timestamp": "2026-10-24T12:00:00",
+        "type": "REVERSAL",
+        "description": "Money successfully reversed / credited to account.",
+        "details": {
+          "reversal_date": "2026-10-24 12:00:00"
+        }
+      }
+    ],
+    "ticket_number": null,
+    "notes": null
+  },
+  {
+    "id": "a95e2f6a-71db-4f6f-9d8c-85c92ec8dd14",
+    "created_at": "2026-10-31T18:18:01.276125",
+    "updated_at": "2026-10-31T18:18:01.319443",
+    "transaction": {
+      "amount": 1500.0,
+      "reference": "428912345678",
+      "bank": "HDFC Bank",
+      "date": "2026-10-15 00:00:00",
+      "rail": "UPI",
+      "status": "DEBITED",
+      "customer_name": "Account Holder",
+      "customer_email": "customer@example.com",
+      "customer_phone": "9876543210",
+      "account_number": "XX1234"
+    },
+    "rule_id": "upi_p2p_failed",
+    "customer_role": "Remitter",
+    "money_returned": true,
+    "reversal_date": "2026-10-24T12:00:00",
+    "evaluation": {
+      "deadline_date": "2026-10-16T00:00:00",
+      "tat_days": 1,
+      "day_type": "calendar",
+      "status": "REVERSED_LATE",
+      "days_late": 8,
+      "penalty_amount": 800.0,
+      "responsible_party": "Beneficiary Bank / Remitter Bank",
+      "circular_reference": "RBI Circular DPSS.CO.PD No.629/02.01.014/2019-20 (Harmonisation Circular Item 5(a))",
+      "rule_id": "upi_p2p_failed"
+    },
+    "events": [
+      {
+        "id": "39962272-8f32-4d6b-89ef-45aa155d789a",
+        "case_id": "a95e2f6a-71db-4f6f-9d8c-85c92ec8dd14",
+        "timestamp": "2026-10-31T18:18:01.276125",
+        "type": "TRANSACTION",
+        "description": "Case opened for failed UPI payment of Rs. 1,500.00.",
+        "details": {
+          "reference": "428912345678",
+          "bank": "HDFC Bank"
+        }
+      },
+      {
+        "id": "59ab7e03-ab86-4771-93f7-8314ed8e1616",
+        "case_id": "a95e2f6a-71db-4f6f-9d8c-85c92ec8dd14",
+        "timestamp": "2026-10-31T18:18:01.284920",
+        "type": "BANK_COMPLAINT",
+        "description": "Generated Bank Complaint letter.",
+        "details": {
+          "level": "bank_complaint",
+          "generated_by": "template"
+        }
+      },
+      {
+        "id": "b5d45e63-90d6-48e3-b97f-f00133dea348",
+        "case_id": "a95e2f6a-71db-4f6f-9d8c-85c92ec8dd14",
+        "timestamp": "2026-10-31T18:18:01.314402",
+        "type": "OMBUDSMAN_PACK",
+        "description": "Generated full RBI Ombudsman Dossier PDF pack.",
+        "details": {
+          "reference": "428912345678"
+        }
+      },
+      {
+        "id": "7d824275-d41c-4ae1-8814-ef0d18f538d5",
+        "case_id": "a95e2f6a-71db-4f6f-9d8c-85c92ec8dd14",
+        "timestamp": "2026-10-24T12:00:00",
+        "type": "REVERSAL",
+        "description": "Money successfully reversed / credited to account.",
+        "details": {
+          "reversal_date": "2026-10-24 12:00:00"
+        }
+      }
+    ],
+    "ticket_number": null,
+    "notes": null
+  },
+  {
+    "id": "9da5a187-535c-4317-b095-b6e7590777d5",
+    "created_at": "2026-10-31T18:56:21.433266",
+    "updated_at": "2026-10-31T18:56:21.475000",
+    "transaction": {
+      "amount": 1500.0,
+      "reference": "428912345678",
+      "bank": "HDFC Bank",
+      "date": "2026-10-15 00:00:00",
+      "rail": "UPI",
+      "status": "DEBITED",
+      "customer_name": "Account Holder",
+      "customer_email": "customer@example.com",
+      "customer_phone": "9876543210",
+      "account_number": "XX1234"
+    },
+    "rule_id": "upi_p2p_failed",
+    "customer_role": "Remitter",
+    "money_returned": true,
+    "reversal_date": "2026-10-24T12:00:00",
+    "evaluation": {
+      "deadline_date": "2026-10-16T00:00:00",
+      "tat_days": 1,
+      "day_type": "calendar",
+      "status": "REVERSED_LATE",
+      "days_late": 8,
+      "penalty_amount": 800.0,
+      "responsible_party": "Beneficiary Bank / Remitter Bank",
+      "circular_reference": "RBI Circular DPSS.CO.PD No.629/02.01.014/2019-20 (Harmonisation Circular Item 5(a))",
+      "rule_id": "upi_p2p_failed"
+    },
+    "events": [
+      {
+        "id": "f2097018-5ee7-42d8-ab7f-73b9f12ff388",
+        "case_id": "9da5a187-535c-4317-b095-b6e7590777d5",
+        "timestamp": "2026-10-31T18:56:21.433266",
+        "type": "TRANSACTION",
+        "description": "Case opened for failed UPI payment of Rs. 1,500.00.",
+        "details": {
+          "reference": "428912345678",
+          "bank": "HDFC Bank"
+        }
+      },
+      {
+        "id": "5d5bf70c-8d65-45cf-abcf-d7d7b3e8568c",
+        "case_id": "9da5a187-535c-4317-b095-b6e7590777d5",
+        "timestamp": "2026-10-31T18:56:21.442119",
+        "type": "BANK_COMPLAINT",
+        "description": "Generated Bank Complaint letter.",
+        "details": {
+          "level": "bank_complaint",
+          "generated_by": "template"
+        }
+      },
+      {
+        "id": "c0c388c5-c49b-4d56-ab40-7b68f6601515",
+        "case_id": "9da5a187-535c-4317-b095-b6e7590777d5",
+        "timestamp": "2026-10-31T18:56:21.470666",
+        "type": "OMBUDSMAN_PACK",
+        "description": "Generated full RBI Ombudsman Dossier PDF pack.",
+        "details": {
+          "reference": "428912345678"
+        }
+      },
+      {
+        "id": "9ca2cc68-e0f5-481a-b8c5-e8601b756c7a",
+        "case_id": "9da5a187-535c-4317-b095-b6e7590777d5",
+        "timestamp": "2026-10-24T12:00:00",
+        "type": "REVERSAL",
+        "description": "Money successfully reversed / credited to account.",
+        "details": {
+          "reversal_date": "2026-10-24 12:00:00"
+        }
+      }
+    ],
+    "ticket_number": null,
+    "notes": null
+  }
+]

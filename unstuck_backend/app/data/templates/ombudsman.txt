@@ -1,0 +1,60 @@
+To,
+The Reserve Bank of India Integrated Ombudsman,
+Centralised Receipt and Processing Centre (CRPC),
+Reserve Bank of India, 4th Floor, Sector 17, Chandigarh - 160017
+(Or via Complaint Management System portal: https://cms.rbi.org.in)
+
+Subject: Formal Complaint under Reserve Bank - Integrated Ombudsman Scheme, 2021 against {{ bank_name }} for Deficiency in Service and Non-Payment of Mandated Compensation
+
+Date: {{ letter_date }}
+
+Respected Ombudsman,
+
+I hereby submit this formal complaint under Clause 10 of the Reserve Bank - Integrated Ombudsman Scheme, 2021 (RB-IOS, 2021) regarding the failure and gross deficiency of service by {{ bank_name }} in resolving a failed electronic transaction and refusing/delaying statutory compensation mandated by the Reserve Bank of India.
+
+1. Complainant Information:
+- Full Name: {{ customer_name }}
+- Email Address: {{ customer_email }}
+- Mobile Number: {{ customer_phone }}
+- Account / Registered Identifier: {{ account_number }}
+
+2. Regulated Entity Details:
+- Bank / Financial Institution: {{ bank_name }}
+- Primary Redressal Ticket No: {{ ticket_number }}
+- Escalation to Nodal Officer Date: {{ escalation_date }}
+
+3. Transaction Particulars:
+- Transaction Date & Time: {{ transaction_date }}
+- Payment Rail: {{ rail }}
+- Disputed Principal Amount: Rs. {{ amount }}
+- Reference / UTR Number: {{ reference }}
+- Nature of Failure: {{ failure_reason }}
+
+4. Chronology and Grievance History:
+- On {{ transaction_date }}, my account was debited for Rs. {{ amount }} via {{ rail }}.
+- The beneficiary account was never credited, nor was the amount reversed within {{ tat_deadline }} as mandated under RBI Circular DPSS.CO.PD No.629/02.01.014/2019-20.
+- Level 1 complaint was filed with {{ bank_name }} (Ref: {{ ticket_number }}).
+- Level 2 escalation was submitted to the Principal Nodal Officer on {{ escalation_date }}.
+- More than 30 days have elapsed since the original grievance / the bank has failed to resolve the issue satisfactorily within prescribed turnaround times.
+
+5. Statutory Compensation Computation:
+- Turnaround Deadline: {{ deadline_date }}
+- Days Overdue: {{ days_overdue }} calendar days
+- Prescribed Compensation Rate: Rs. 100 per calendar day of delay
+- Total Statutory Compensation Claimed: Rs. {{ compensation_amount }}
+
+6. Prayers for Relief:
+I respectfully pray that the Hon'ble Ombudsman may be pleased to direct {{ bank_name }} to:
+a) Immediately credit/refund the principal sum of Rs. {{ amount }} to my account.
+b) Pay statutory delay compensation of Rs. {{ compensation_amount }} (calculated at Rs. 100 per day for {{ days_overdue }} days of delay).
+c) Award compensation for mental agony, harassment, and expenses incurred under the provisions of the RB-IOS, 2021.
+
+Verification:
+I, {{ customer_name }}, do hereby declare that the particulars stated above are true and correct to the best of my knowledge and belief, and that no proceedings on the same subject matter are pending before any Court, Tribunal, or Arbitrator.
+
+Yours faithfully,
+
+{{ customer_name }}
+Mobile: {{ customer_phone }}
+Email: {{ customer_email }}
+

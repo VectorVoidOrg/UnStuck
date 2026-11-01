@@ -128,11 +128,17 @@ fun UnstuckDetailScreen(
                 ),
                 shape = RoundedCornerShape(14.dp)
             ) {
-                Icon(Icons.Default.Description, contentDescription = "Notice", modifier = Modifier.size(18.dp))
+                Icon(
+                    imageVector = Icons.Default.Description,
+                    contentDescription = "Notice",
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Draft Legal Notice & Escalation Ladder →",
                     style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
             }

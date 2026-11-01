@@ -7,16 +7,14 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [
-        FlaggedTransactionEntity::class,
-        WhitelistedVpaEntity::class
+        FlaggedTransactionEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun flaggedTransactionDao(): FlaggedTransactionDao
-    abstract fun whitelistedVpaDao(): WhitelistedVpaDao
 
     companion object {
         @Volatile

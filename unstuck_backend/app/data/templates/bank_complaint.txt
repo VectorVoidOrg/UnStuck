@@ -1,0 +1,43 @@
+To,
+The Branch Manager / Customer Service Officer,
+{{ bank_name }}
+
+Subject: Immediate Reversal of Failed {{ rail }} Transaction of Rs. {{ amount }} (Ref: {{ reference }}) and Compensation under RBI Circular
+
+Date: {{ letter_date }}
+
+Dear Sir/Madam,
+
+I am writing to officially register a formal grievance regarding a failed {{ rail }} transaction debited from my account, which has neither credited the recipient nor been reversed within the statutory Turn Around Time (TAT).
+
+Transaction Particulars:
+- Transaction Date & Time: {{ transaction_date }}
+- Transaction Amount: Rs. {{ amount }}
+- Reference / UTR Number: {{ reference }}
+- Payment Rail: {{ rail }}
+- Failure Description: {{ failure_reason }}
+- Account / Registered Identifier: {{ account_number }}
+- Customer Name: {{ customer_name }}
+- Contact Phone: {{ customer_phone }}
+- Contact Email: {{ customer_email }}
+
+Regulatory Framework and Statutory Turn Around Time (TAT):
+Under Reserve Bank of India (RBI) Circular DPSS.CO.PD No.629/02.01.014/2019-20 dated September 20, 2019 ("Harmonisation of Turn Around Time (TAT) and customer compensation for failed transactions"), the stipulated turnaround time for auto-reversal of this {{ rail }} transaction is {{ tat_deadline }}.
+
+The stipulated deadline elapsed on {{ deadline_date }}. As on date, the transaction is overdue by {{ days_overdue }} calendar day(s).
+
+Demand for Redressal and Compensation:
+In accordance with the aforementioned RBI circular:
+1. I request an immediate reversal and credit of the principal debited amount of Rs. {{ amount }} back to my account.
+2. I request the statutory compensation of Rs. 100 per day of delay (totalling Rs. {{ compensation_amount }} for {{ days_overdue }} days of delay) as mandated by the circular.
+
+Kindly issue a formal grievance acknowledgement and ticket reference number immediately upon receipt of this letter. If this matter is not resolved satisfactorily, I reserve the right to escalate this complaint to the Principal Nodal Officer and subsequently to the RBI Ombudsman under the Reserve Bank - Integrated Ombudsman Scheme, 2021.
+
+Thanking you.
+
+Yours sincerely,
+
+{{ customer_name }}
+Phone: {{ customer_phone }}
+Email: {{ customer_email }}
+

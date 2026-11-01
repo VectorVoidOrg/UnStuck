@@ -44,7 +44,6 @@ class RiskEvaluator(
     private val context: Context,
     private val bloomFilter: BloomFilterEngine = BloomFilterEngine.getInstance(context),
     private val heuristicEngine: HeuristicEngine = HeuristicEngine(),
-    private val callStateMonitor: CallStateMonitor = CallStateMonitor.getInstance(context),
     private val repository: FraudRepository = FraudRepository(context),
     private val apiService: UfoApiService = UfoApiService.create(),
     private val notifier: InterventionNotifier = InterventionNotifier.getInstance(context)
@@ -108,72 +107,40 @@ class RiskEvaluator(
     ): RiskEvaluationResult = withContext(Dispatchers.IO) {
         val startTime = System.currentTimeMillis()
         val normalizedVpa = vpa.trim().lowercase()
-
-        // Check Session Whitelist (User dismissed within 5 minutes)
-        if (SessionWhitelist.isWhitelisted(normalizedVpa)) {
-            val elapsed = System.currentTimeMillis() - startTime
-            return@withContext RiskEvaluationResult(
-                vpa = vpa,
-                payeeName = payeeName,
-                amount = amount,
-                riskScore = 0,
-                status = RiskStatus.SAFE,
-                triggers = listOf("Session Whitelisted by User"),
-                isHardBlocked = false,
-                latencyMs = elapsed,
-                sourceApp = sourceApp
-            )
-        }
-
-        // Check Permanent Whitelist from Room
-        if (repository.isWhitelisted(normalizedVpa)) {
-            val elapsed = System.currentTimeMillis() - startTime
-            return@withContext RiskEvaluationResult(
-                vpa = vpa,
-                payeeName = payeeName,
-                amount = amount,
-                riskScore = 0,
-                status = RiskStatus.SAFE,
-                triggers = listOf("Trusted Receiver Whitelist"),
-                isHardBlocked = false,
-                latencyMs = elapsed,
-                sourceApp = sourceApp
-            )
-        }
-
-        val callActive = callStateMonitor.isCallActive()
+        val checkId = java.util.UUID.randomUUID().toString()
         val triggers = mutableListOf<String>()
         var finalScore = 0
         var isHardBlocked = false
         var backendVerified = false
+        var isPartial = false
 
-        // Step 1: Send extracted screen details (Receiver, VPA, Amount) to Backend (/api/v1/evaluate)
+        // Step 1: Send extracted screen details (Receiver, VPA, Amount) to Gateway (/prevention/check)
         try {
-            val response = apiService.evaluateTransaction(
-                EvaluateRequest(
-                    vpa = normalizedVpa,
-                    receiver = payeeName,
-                    payeeName = payeeName,
-                    amount = amount ?: 0.0,
-                    isCollectRequest = isCollectRequest,
-                    callStateOffhook = callActive,
-                    sourceApp = sourceApp
+            val response = kotlinx.coroutines.withTimeout(1500L) {
+                apiService.checkPrevention(
+                    com.ufo.fraudobserver.data.remote.PreventionCheckRequest(
+                        checkId = checkId,
+                        receiverVpa = normalizedVpa,
+                        receiverName = payeeName,
+                        amount = amount ?: 0.0,
+                        sourceApp = sourceApp,
+                        timestamp = System.currentTimeMillis()
+                    )
                 )
-            )
+            }
             val body = response.body()
             if (response.isSuccessful && body != null) {
                 backendVerified = true
-                finalScore = if (body.risk <= 1.0f && body.risk > 0f) {
-                    (body.risk * 100f).roundToInt()
-                } else {
-                    body.risk.roundToInt().coerceIn(0, 100)
-                }
-                isHardBlocked = body.isBlacklisted || finalScore >= 90
+                finalScore = body.riskScore
+                isHardBlocked = finalScore >= 70
                 triggers.addAll(body.reasons)
-                Log.d(TAG, "Backend evaluation succeeded: score=$finalScore, reasons=${body.reasons}")
+                Log.d(TAG, "Gateway evaluation succeeded: score=$finalScore, verdict=${body.verdict}")
+            } else {
+                isPartial = true
             }
         } catch (e: Exception) {
-            Log.d(TAG, "Backend under process / unreachable (${e.message}), using on-device risk engine fallback.")
+            isPartial = true
+            Log.d(TAG, "Gateway evaluation timed out or returned error (${e.message}), using on-device partial check.")
         }
 
         // Step 2: If backend is under process / offline, compute via on-device risk engine
@@ -199,13 +166,7 @@ class RiskEvaluator(
                 triggers.addAll(heuristicResult.triggers)
             }
 
-            // Layer 3: Live Call / Vishing Telemetry
-            if (callActive) {
-                cumulativeScore += 50
-                triggers.add("ACTIVE CALL DETECTED: Potential vishing pressure")
-            }
-
-            finalScore = min(cumulativeScore, 100)
+            finalScore = kotlin.math.min(cumulativeScore, 100)
         }
 
         if (triggers.isEmpty()) {
@@ -262,7 +223,8 @@ class RiskEvaluator(
                         payeeName = payeeName,
                         amount = amount,
                         sourceApp = sourceApp,
-                        backendVerified = backendVerified
+                        backendVerified = backendVerified,
+                        isPartialCheck = isPartial
                     )
                 }
             }

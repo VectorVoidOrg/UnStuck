@@ -17,6 +17,8 @@ val UfoHeroIconTint = Color(0xFFA7F3D0)
 val UfoBorder = Color(0xFFE2E8F0)
 val UfoFilterTrack = Color(0xFFE9EDF3)
 val UfoSwitchOff = Color(0xFFCBD5E1)
+val UfoSurfaceDark = Color.White
+val UfoSurfaceMuted = Color(0xFFF1F5F9)
 
 // Danger / Warning / Safe Semantic Tokens
 val UfoDangerBg = Color(0xFFFEF2F2)

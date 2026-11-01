@@ -69,6 +69,14 @@ class InterventionNotifier(private val context: Context) {
         }
     }
 
+    fun isChannelMuted(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = notificationManager.getNotificationChannel(CHANNEL_ID) ?: return false
+            return channel.importance == NotificationManager.IMPORTANCE_NONE
+        }
+        return !notificationManager.areNotificationsEnabled()
+    }
+
     fun showIntervention(
         vpa: String,
         riskScore: Int,
@@ -77,13 +85,13 @@ class InterventionNotifier(private val context: Context) {
         payeeName: String?,
         amount: Double?,
         sourceApp: String? = null,
-        backendVerified: Boolean = false
+        backendVerified: Boolean = false,
+        isPartialCheck: Boolean = false
     ) {
-        val notificationId = NOTIFICATION_ID_BASE + (vpa.hashCode() and 0xFFFF)
+        val notificationId = 8080 // Update in place to prevent clutter
 
         val abortIntent = Intent(context, UfoMainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("NAVIGATE_TO", "ALERT_DETAIL")
             putExtra("EXTRA_VPA", vpa)
             putExtra("EXTRA_PAYEE", payeeName)
             putExtra("EXTRA_AMOUNT", amount ?: 0.0)
@@ -110,17 +118,21 @@ class InterventionNotifier(private val context: Context) {
         )
 
         val appLabel = formatSourceAppName(sourceApp).uppercase(Locale.getDefault())
-        val engineTag = if (backendVerified) "CLOUD SCORE" else "LIVE SCORE"
+        val engineTag = when {
+            isPartialCheck -> "ON-DEVICE SCORE"
+            backendVerified -> "CLOUD VERIFIED"
+            else -> "LIVE SHIELD"
+        }
 
         val badgeRes = when {
-            riskScore >= 60 -> R.drawable.bg_risk_badge
+            riskScore >= 70 -> R.drawable.bg_risk_badge
             riskScore >= 30 -> R.drawable.bg_warn_badge
             else -> R.drawable.bg_safe_badge
         }
         val badgeText = when {
-            riskScore >= 60 -> "HIGH RISK · $riskScore/100"
-            riskScore >= 30 -> "CAUTION · $riskScore/100"
-            else -> "SAFE · $riskScore/100"
+            riskScore >= 70 -> "LIKELY SCAM · $riskScore/100"
+            riskScore >= 30 -> "BE CAREFUL · $riskScore/100"
+            else -> "LIKELY SAFE · $riskScore/100"
         }
 
         val displayPayee = payeeName?.takeIf { it.isNotBlank() } ?: vpa.substringBefore("@")
@@ -132,10 +144,13 @@ class InterventionNotifier(private val context: Context) {
                 append(" • ")
                 append(secondaryTrigger)
             }
+            if (isPartialCheck) {
+                append(" (Offline Partial Check)")
+            }
         }
 
         val remoteViews = RemoteViews(context.packageName, R.layout.notification_fraud_notch).apply {
-            setTextViewText(R.id.notch_header, "UFO UPI GUARD • $appLabel • $engineTag")
+            setTextViewText(R.id.notch_header, "UFO UPI SHIELD • $appLabel • $engineTag")
             setTextViewText(R.id.notch_risk_badge, badgeText)
             setInt(R.id.notch_risk_badge, "setBackgroundResource", badgeRes)
             setTextViewText(R.id.notch_vpa, "$displayPayee ($vpa)")
@@ -143,12 +158,18 @@ class InterventionNotifier(private val context: Context) {
             setTextViewText(R.id.notch_reason, reasonText)
             setTextViewText(
                 R.id.btn_abort_payment,
-                if (riskScore >= 60) "Abort & Review" else "Open Details"
+                if (riskScore >= 70) "Abort Transaction" else "View Details"
             )
 
             setOnClickPendingIntent(R.id.btn_abort_payment, abortPendingIntent)
             setOnClickPendingIntent(R.id.btn_dismiss_notch, dismissPendingIntent)
         }
+
+        val publicNotification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_ufo)
+            .setContentTitle("UPI Transaction Protected")
+            .setContentText("Transaction evaluation in progress")
+            .build()
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_ufo)
@@ -160,8 +181,10 @@ class InterventionNotifier(private val context: Context) {
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_CALL)
             .setVibrate(longArrayOf(0, 250, 120, 250))
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setPublicVersion(publicNotification)
             .setAutoCancel(true)
+            .setTimeoutAfter(12000L) // 12-second auto-timeout
             .setContentIntent(abortPendingIntent)
 
         notificationManager.notify(notificationId, builder.build())

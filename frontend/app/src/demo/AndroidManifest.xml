@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <provider
+            android:name=".demo.DemoInitContentProvider"
+            android:authorities="${applicationId}.demo.init"
+            android:exported="false"
+            android:initOrder="100" />
+
+        <activity
+            android:name=".demo.DemoPaymentActivity"
+            android:exported="true"
+            android:label="UPI Payment (Demo Simulator)"
+            android:theme="@style/Theme.UfoFraudObserver">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+

@@ -1,0 +1,40 @@
+To,
+The Principal Nodal Officer,
+{{ bank_name }}
+Email: {{ nodal_officer_email }}
+
+Subject: Escalation: Unresolved Failed {{ rail }} Transaction of Rs. {{ amount }} (Ref: {{ reference }}) - Ticket Ref: {{ ticket_number }}
+
+Date: {{ letter_date }}
+
+Dear Principal Nodal Officer,
+
+I am writing to formally escalate my grievance regarding an unresolved failed {{ rail }} transaction. Despite lodging a prior complaint with the bank (Ticket Reference: {{ ticket_number }}), the issue remains unresolved beyond the prescribed regulatory Turn Around Time (TAT).
+
+1. Summary of Dispute:
+- Customer Name: {{ customer_name }}
+- Contact Details: {{ customer_phone }} | {{ customer_email }}
+- Account Identifier: {{ account_number }}
+- Transaction Date: {{ transaction_date }}
+- Transaction Amount: Rs. {{ amount }}
+- Reference / UTR Number: {{ reference }}
+- Payment Rail: {{ rail }}
+- Prior Complaint Ticket Number: {{ ticket_number }}
+
+2. Non-Compliance with RBI Guidelines:
+As per RBI Circular DPSS.CO.PD No.629/02.01.014/2019-20 on "Harmonisation of Turn Around Time (TAT) and customer compensation for failed transactions", the bank was required to auto-reverse the failed transaction within {{ tat_deadline }} (due on {{ deadline_date }}).
+
+As of today, the delay stands at {{ days_overdue }} calendar day(s).
+
+3. Requested Relief:
+In accordance with RBI directions:
+1. Immediate reversal and restoration of the debited sum of Rs. {{ amount }} to my account.
+2. Payment of accrued statutory penalty compensation at the rate of Rs. 100 per day of delay (amounting to Rs. {{ compensation_amount }} for {{ days_overdue }} days).
+
+Please be advised that if this escalation is not settled within the regulatory timeframe or if satisfactory resolution is not provided, this matter will be escalated directly to the Reserve Bank of India Ombudsman under the Reserve Bank - Integrated Ombudsman Scheme, 2021 (RB-IOS, 2021) without further notice.
+
+Yours faithfully,
+
+{{ customer_name }}
+Contact: {{ customer_phone }} / {{ customer_email }}
+

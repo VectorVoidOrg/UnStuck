@@ -4,7 +4,6 @@ import android.app.Application
 import android.util.Log
 import com.ufo.fraudobserver.engine.BloomFilterEngine
 import com.ufo.fraudobserver.intervention.InterventionNotifier
-import com.ufo.fraudobserver.sync.BlacklistSyncWorker
 
 class UfoApplication : Application() {
 
@@ -21,9 +20,6 @@ class UfoApplication : Application() {
 
         // Initialize high-urgency heads-up notification channel
         InterventionNotifier.getInstance(this)
-
-        // Schedule periodic delta sync worker (every 6 hours)
-        BlacklistSyncWorker.schedule(this)
     }
 }
 

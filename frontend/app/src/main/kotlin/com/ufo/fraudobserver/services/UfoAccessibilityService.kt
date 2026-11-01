@@ -23,15 +23,15 @@ class UfoAccessibilityService : AccessibilityService() {
 
     companion object {
         private const val TAG = "UfoAccessibilityService"
-        private const val CONTENT_DEBOUNCE_MS = 280L
-        private const val FLAG_SECURE_CACHE_TTL_MS = 15_000L
+        private const val CONTENT_DEBOUNCE_MS = 250L
 
-        private val IGNORED_PACKAGES = setOf(
-            "com.ufo.fraudobserver",
-            "com.android.systemui",
-            "com.google.android.apps.nexuslauncher",
-            "com.android.launcher3",
-            "com.android.settings"
+        val ALLOWED_UPI_PACKAGES = setOf(
+            "com.google.android.apps.nbu.paisa.user", // Google Pay
+            "com.phonepe.app",                       // PhonePe
+            "net.one97.paytm",                        // Paytm
+            "in.org.npci.upiapp",                     // BHIM
+            "com.dreamplug.androidapp",               // Cred
+            "in.amazon.mShop.android.shopping"        // Amazon Pay
         )
     }
 
@@ -39,11 +39,9 @@ class UfoAccessibilityService : AccessibilityService() {
     private var debounceJob: Job? = null
     private lateinit var riskEvaluator: RiskEvaluator
 
-    // In-memory cache for FLAG_SECURE screen blinding mitigation
-    private var lastSeenVpa: String? = null
-    private var lastSeenPayeeName: String? = null
-    private var lastSeenAmount: Double? = null
-    private var lastSeenTimestamp: Long = 0L
+    // In-memory dedupe cache (vpa, amount, app)
+    private var lastCheckedKey: String? = null
+    private var lastCheckedTime: Long = 0L
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -55,13 +53,15 @@ class UfoAccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
 
-        // Respect user's choice: only extract when Background UPI Guard is enabled
+        // Hard constraint: If Prevention switch is OFF, ignore every event & make ZERO network calls
         if (!UfoProtectionPrefs.isBackgroundGuardEnabled(applicationContext)) {
             return
         }
 
-        val pkg = event.packageName?.toString()
-        if (pkg != null && IGNORED_PACKAGES.contains(pkg)) {
+        val pkg = event.packageName?.toString() ?: return
+        // Allow supported UPI apps + own package (for demo payment simulation)
+        val isAllowedPackage = ALLOWED_UPI_PACKAGES.contains(pkg) || pkg == applicationContext.packageName
+        if (!isAllowedPackage) {
             return
         }
 
@@ -85,29 +85,31 @@ class UfoAccessibilityService : AccessibilityService() {
             try {
                 if (!UfoProtectionPrefs.isBackgroundGuardEnabled(applicationContext)) return@launch
 
-                val rootNode = rootInActiveWindow
-                if (rootNode == null) {
-                    val now = System.currentTimeMillis()
-                    if (lastSeenVpa != null && (now - lastSeenTimestamp < FLAG_SECURE_CACHE_TTL_MS)) {
-                        Log.d(TAG, "FLAG_SECURE active. Context retained from 15-second cache: VPA=$lastSeenVpa")
-                    }
-                    return@launch
-                }
+                val rootNode = rootInActiveWindow ?: return@launch
+                val activePkg = packageName ?: rootNode.packageName?.toString() ?: return@launch
 
-                val activePkg = packageName ?: rootNode.packageName?.toString()
-                if (activePkg != null && IGNORED_PACKAGES.contains(activePkg)) {
-                    return@launch
-                }
+                val isAllowedPackage = ALLOWED_UPI_PACKAGES.contains(activePkg) || activePkg == applicationContext.packageName
+                if (!isAllowedPackage) return@launch
 
+                val startTime = System.currentTimeMillis()
                 val payload = PayloadParser.parseAccessibilityTree(rootNode)
 
                 if (payload != null && !payload.vpa.isNullOrBlank()) {
                     val vpa = payload.vpa
+                    val amount = payload.amount ?: 0.0
 
-                    lastSeenVpa = vpa
-                    lastSeenPayeeName = payload.payeeName
-                    lastSeenAmount = payload.amount
-                    lastSeenTimestamp = System.currentTimeMillis()
+                    // Debounce & dedupe: same (vpa, amount, app) in 5s window = ONE check
+                    val dedupeKey = "$vpa:$amount:$activePkg"
+                    val now = System.currentTimeMillis()
+                    if (dedupeKey == lastCheckedKey && (now - lastCheckedTime < 5000L)) {
+                        return@launch
+                    }
+
+                    lastCheckedKey = dedupeKey
+                    lastCheckedTime = now
+
+                    val parseElapsed = System.currentTimeMillis() - startTime
+                    Log.d(TAG, "Off-thread parsed payment page in ${parseElapsed}ms: $vpa, amount: $amount")
 
                     riskEvaluator.evaluateAndInterveneAsync(
                         vpa = vpa,

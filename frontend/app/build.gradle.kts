@@ -23,6 +23,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -38,6 +39,31 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
+
+    flavorDimensions += "version"
+    productFlavors {
+        create("prod") {
+            dimension = "version"
+            manifestPlaceholders["appLabel"] = "UFO"
+            buildConfigField("boolean", "IS_DEMO", "false")
+            buildConfigField("String", "DEFAULT_BASE_URL", "\"https://temporary-snappy-maple-v2pe7o5-n4c5fhzfe-anon-delta-flame.vercel.app/\"")
+            buildConfigField("String", "GATEWAY_BASE_URL", "\"https://temporary-snappy-maple-v2pe7o5-n4c5fhzfe-anon-delta-flame.vercel.app/\"")
+        }
+        create("demo") {
+            dimension = "version"
+            applicationIdSuffix = ".demo"
+            manifestPlaceholders["appLabel"] = "UFO Demo"
+            buildConfigField("boolean", "IS_DEMO", "true")
+            buildConfigField("String", "DEFAULT_BASE_URL", "\"http://10.0.2.2:8000/\"")
+            buildConfigField("String", "GATEWAY_BASE_URL", "\"http://10.0.2.2:8000/\"")
+        }
     }
 }
 
@@ -53,6 +79,18 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
+
+    // Credentials & Google Auth
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+
+    // Play Billing
+    implementation(libs.billing.ktx)
+
+    // DataStore & Tink Security
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.tink.android)
 
     // Room
     implementation(libs.androidx.room.runtime)

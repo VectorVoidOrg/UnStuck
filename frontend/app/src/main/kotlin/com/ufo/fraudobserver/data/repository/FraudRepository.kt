@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import com.ufo.fraudobserver.data.local.AppDatabase
 import com.ufo.fraudobserver.data.local.FlaggedTransactionEntity
-import com.ufo.fraudobserver.data.local.WhitelistedVpaEntity
 import com.ufo.fraudobserver.data.remote.EvaluateRequest
 import com.ufo.fraudobserver.data.remote.ReportRequest
 import com.ufo.fraudobserver.data.remote.UfoApiService
@@ -26,9 +25,6 @@ class FraudRepository(
 
     val flaggedTransactions: Flow<List<FlaggedTransactionEntity>> =
         database.flaggedTransactionDao().getAllFlow()
-
-    val whitelistedVpas: Flow<List<WhitelistedVpaEntity>> =
-        database.whitelistedVpaDao().getAllFlow()
 
     val totalThreatCount: Flow<Int> =
         database.flaggedTransactionDao().getCountFlow()
@@ -65,18 +61,6 @@ class FraudRepository(
             sourceApp = sourceApp
         )
         database.flaggedTransactionDao().insert(entity)
-    }
-
-    suspend fun addToWhitelist(vpa: String) = withContext(Dispatchers.IO) {
-        database.whitelistedVpaDao().insert(WhitelistedVpaEntity(vpa = vpa))
-    }
-
-    suspend fun isWhitelisted(vpa: String): Boolean = withContext(Dispatchers.IO) {
-        database.whitelistedVpaDao().isWhitelisted(vpa)
-    }
-
-    suspend fun removeFromWhitelist(vpa: String) = withContext(Dispatchers.IO) {
-        database.whitelistedVpaDao().remove(vpa)
     }
 
     suspend fun clearHistory() = withContext(Dispatchers.IO) {

@@ -1,0 +1,83 @@
+[
+  {
+    "id": "hdfc",
+    "name": "HDFC Bank",
+    "aliases": ["hdfc", "hdfc bank", "hdfcbank"],
+    "nodal_officer_email": "pno@hdfcbank.com",
+    "nodal_officer_name": "Principal Nodal Officer, HDFC Bank Ltd.",
+    "grievance_page_link": "https://www.hdfcbank.com/personal/need-help/grievance-redressal-portal",
+    "customer_care_phone": "1800 202 6161 / 1860 267 6161",
+    "last_verified_date": "2026-10-20"
+  },
+  {
+    "id": "sbi",
+    "name": "State Bank of India",
+    "aliases": ["sbi", "state bank", "state bank of india"],
+    "nodal_officer_email": "nodalofficer@sbi.co.in",
+    "nodal_officer_name": "General Manager & Principal Nodal Officer, SBI",
+    "grievance_page_link": "https://cms.onlinesbi.sbi/cms/",
+    "customer_care_phone": "1800 1234 / 1800 2100",
+    "last_verified_date": "2026-10-20"
+  },
+  {
+    "id": "icici",
+    "name": "ICICI Bank",
+    "aliases": ["icici", "icici bank", "icicibank"],
+    "nodal_officer_email": "headservicequality@icicibank.com",
+    "nodal_officer_name": "Principal Nodal Officer, ICICI Bank Towers",
+    "grievance_page_link": "https://www.icicibank.com/complaints/complaints",
+    "customer_care_phone": "1800 1080",
+    "last_verified_date": "2026-10-20"
+  },
+  {
+    "id": "axis",
+    "name": "Axis Bank",
+    "aliases": ["axis", "axis bank", "axisbank"],
+    "nodal_officer_email": "nodal.officer@axisbank.com",
+    "nodal_officer_name": "Principal Nodal Officer, Axis Bank Ltd.",
+    "grievance_page_link": "https://www.axisbank.com/contact-us/grievance-redressal",
+    "customer_care_phone": "1860 419 5555 / 1860 500 5555",
+    "last_verified_date": "2026-10-20"
+  },
+  {
+    "id": "kotak",
+    "name": "Kotak Mahindra Bank",
+    "aliases": ["kotak", "kotak mahindra", "kotak bank"],
+    "nodal_officer_email": "nodalofficer@kotak.com",
+    "nodal_officer_name": "Principal Nodal Officer, Kotak Mahindra Bank Ltd.",
+    "grievance_page_link": "https://www.kotak.com/en/customer-service/grievance-redressal.html",
+    "customer_care_phone": "1860 266 2666",
+    "last_verified_date": "2026-10-20"
+  },
+  {
+    "id": "pnb",
+    "name": "Punjab National Bank",
+    "aliases": ["pnb", "punjab national bank", "punjab national"],
+    "nodal_officer_email": "care@pnb.co.in",
+    "nodal_officer_name": "Chief Nodal Officer, Punjab National Bank",
+    "grievance_page_link": "https://www.pnbindia.in/grievance.html",
+    "customer_care_phone": "1800 180 2222 / 1800 103 2222",
+    "last_verified_date": "2026-10-20"
+  },
+  {
+    "id": "bob",
+    "name": "Bank of Baroda",
+    "aliases": ["bob", "bank of baroda", "baroda"],
+    "nodal_officer_email": "gm.ops.ho@bankofbaroda.com",
+    "nodal_officer_name": "General Manager & Principal Nodal Officer, Bank of Baroda",
+    "grievance_page_link": "https://www.bankofbaroda.in/customer-service/grievance-redressal",
+    "customer_care_phone": "1800 5700",
+    "last_verified_date": "2026-10-20"
+  },
+  {
+    "id": "canara",
+    "name": "Canara Bank",
+    "aliases": ["canara", "canara bank"],
+    "nodal_officer_email": "nodalofficercan@canarabank.com",
+    "nodal_officer_name": "Principal Nodal Officer, Canara Bank",
+    "grievance_page_link": "https://canarabank.com/pages/customer-grievance",
+    "customer_care_phone": "1800 425 0018",
+    "last_verified_date": "2026-10-20"
+  }
+]
+

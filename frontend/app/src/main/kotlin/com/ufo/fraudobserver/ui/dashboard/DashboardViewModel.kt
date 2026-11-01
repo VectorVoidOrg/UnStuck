@@ -4,14 +4,11 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufo.fraudobserver.data.local.FlaggedTransactionEntity
-import com.ufo.fraudobserver.data.local.WhitelistedVpaEntity
 import com.ufo.fraudobserver.data.repository.FraudRepository
 import com.ufo.fraudobserver.engine.BloomFilterEngine
-import com.ufo.fraudobserver.engine.CallStateMonitor
 import com.ufo.fraudobserver.engine.RiskEvaluationResult
 import com.ufo.fraudobserver.engine.RiskEvaluator
 import com.ufo.fraudobserver.engine.RiskStatus
-import com.ufo.fraudobserver.engine.SessionWhitelist
 import com.ufo.fraudobserver.engine.UfoProtectionPrefs
 import com.ufo.fraudobserver.intervention.InterventionNotifier
 import com.ufo.fraudobserver.parser.PayloadParser
@@ -26,11 +23,8 @@ import kotlinx.coroutines.launch
 data class DashboardUiState(
     val isBackgroundGuardEnabled: Boolean = true,
     val isAccessibilityActive: Boolean = false,
-    val isNotificationListenerActive: Boolean = false,
     val hasPostNotifications: Boolean = false,
-    val hasPhoneState: Boolean = false,
     val isBatteryOptimizedIgnored: Boolean = false,
-    val isCallMonitorActive: Boolean = false,
     val bloomFilterEntries: Int = 0,
     // Step 1 & Step 2 flow state
     val requestText: String = "Flipkart Refund requested ₹4,999. Pay to flipkart.refund@okaxis.",
@@ -50,19 +44,19 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     private val repository = FraudRepository(application)
     private val bloomFilter = BloomFilterEngine.getInstance(application)
-    private val callStateMonitor = CallStateMonitor.getInstance(application)
     private val riskEvaluator = RiskEvaluator.getInstance(application)
     private val notifier = InterventionNotifier.getInstance(application)
+    private val tokenStore = com.ufo.fraudobserver.data.local.SecureTokenStore.getInstance(application)
+    private val apiService = com.ufo.fraudobserver.data.remote.UfoApiService.create(application)
+
+    private val _userProfile = MutableStateFlow<com.ufo.fraudobserver.data.remote.UserProfileResponse?>(null)
+    val userProfile: StateFlow<com.ufo.fraudobserver.data.remote.UserProfileResponse?> = _userProfile.asStateFlow()
+
+    private val _isSignedIn = MutableStateFlow(false)
+    val isSignedIn: StateFlow<Boolean> = _isSignedIn.asStateFlow()
 
     val flaggedTransactions: StateFlow<List<FlaggedTransactionEntity>> =
         repository.flaggedTransactions.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            emptyList()
-        )
-
-    val whitelistedVpas: StateFlow<List<WhitelistedVpaEntity>> =
-        repository.whitelistedVpas.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
             emptyList()
@@ -84,6 +78,55 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             repository.cleanLegacySeededDataIfNeeded()
         }
         refreshStatus()
+        refreshProfile()
+    }
+
+    fun refreshProfile() {
+        viewModelScope.launch {
+            val token = tokenStore.getAccessToken()
+            if (!token.isNullOrBlank()) {
+                _isSignedIn.value = true
+                try {
+                    val resp = apiService.getProfile()
+                    if (resp.isSuccessful && resp.body() != null) {
+                        _userProfile.value = resp.body()
+                    }
+                } catch (e: Exception) {
+                    // network error or expired
+                }
+            } else {
+                _isSignedIn.value = false
+                _userProfile.value = null
+            }
+        }
+    }
+
+    fun handleDemoLogin(accessToken: String, refreshToken: String) {
+        viewModelScope.launch {
+            tokenStore.saveTokens(accessToken, refreshToken)
+            refreshProfile()
+        }
+    }
+
+    fun signOut() {
+        viewModelScope.launch {
+            tokenStore.clearTokens()
+            _isSignedIn.value = false
+            _userProfile.value = null
+        }
+    }
+
+    fun deleteAccount() {
+        viewModelScope.launch {
+            try {
+                apiService.deleteAccount()
+            } catch (e: Exception) {
+                // proceed
+            }
+            tokenStore.clearTokens()
+            _isSignedIn.value = false
+            _userProfile.value = null
+        }
     }
 
     fun refreshStatus() {
@@ -91,11 +134,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         _uiState.value = _uiState.value.copy(
             isBackgroundGuardEnabled = UfoProtectionPrefs.isBackgroundGuardEnabled(context),
             isAccessibilityActive = PermissionHelper.isAccessibilityServiceEnabled(context),
-            isNotificationListenerActive = PermissionHelper.isNotificationListenerEnabled(context),
             hasPostNotifications = PermissionHelper.hasPostNotificationsPermission(context),
-            hasPhoneState = PermissionHelper.hasPhoneStatePermission(context),
             isBatteryOptimizedIgnored = PermissionHelper.isBatteryOptimizationIgnored(context),
-            isCallMonitorActive = callStateMonitor.isCallActive(),
             bloomFilterEntries = bloomFilter.getEstimatedCount()
         )
     }
@@ -281,10 +321,6 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun dismissWarningForCurrentVpa() {
-        val currentVpa = _uiState.value.vpa
-        if (currentVpa.isNotBlank()) {
-            SessionWhitelist.add(currentVpa)
-        }
         _uiState.value = _uiState.value.copy(activePopupBanner = null)
     }
 
@@ -313,19 +349,6 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 activePopupBanner = result,
                 statusMessage = "Evaluated in ${result.latencyMs}ms -> Risk Score: ${result.riskScore}%"
             )
-        }
-    }
-
-    fun addTrustedVpa(vpa: String) {
-        if (vpa.isBlank()) return
-        viewModelScope.launch {
-            repository.addToWhitelist(vpa.trim().lowercase())
-        }
-    }
-
-    fun removeTrustedVpa(vpa: String) {
-        viewModelScope.launch {
-            repository.removeFromWhitelist(vpa)
         }
     }
 
