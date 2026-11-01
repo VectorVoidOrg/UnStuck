@@ -17,8 +17,11 @@ class Settings:
     VERSION: str = "4.0.0"
     ENVIRONMENT: str = os.getenv("UFO_ENV", "development")
 
-    # ---- Database (MongoDB + Redis) ----
-    MONGO_URI: str = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+    # ---- Database (MongoDB Atlas + Local Fallback) ----
+    MONGO_URI: str = os.getenv(
+        "MONGO_URI",
+        "mongodb+srv://dhawalmenaria28_db_user:dRc9IHVSxxT0VvJ8@cluster0.uxbjucn.mongodb.net/",
+    )
     MONGO_DB_NAME: str = os.getenv("MONGO_DB_NAME", "ufo_fraud_db")
     REDIS_URL: str = os.getenv("REDIS_URL", "")  # Optional: Redis for velocity/cache/queue
 

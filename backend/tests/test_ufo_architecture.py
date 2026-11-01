@@ -11,6 +11,10 @@ Verifies every component, subcomponent, interaction, and resilience guardrail fr
   5. Step 5B (#2): Token Budget Circuit Breaker (caps Agent at max 3 reasoning loops)
   6. Step 5B (#3): Deterministic Policy Guardrail (hard ₹5,000 Auto-Refund Cap & Fake Receipt UTR block)
   7. Step 5B (#4): HITL & Dead Letter Queue (routes 504 Bank API timeouts & low-confidence verdicts)
+  8. Custom Ledger Test Cases:
+     - `reyshastri-8@oksbi` -> FLAGGED AS FRAUD (BLOCK_SCAM)
+     - `sayasha36@oksbi` -> FLAGGED AS FRAUD (BLOCK_SCAM)
+     - `8890032239@ptsbi` -> DO NOT FLAG (SAFE / ALLOW_PAYMENT)
 """
 import sys
 import time
@@ -227,3 +231,56 @@ def test_8_resilience4_bank_504_timeout_routes_to_dlq_and_human_resolves():
     resolved_ticket = resolve_resp.json()["ticket"]
     assert resolved_ticket["status"] == "RESOLVED_BY_HUMAN"
     assert len(resolved_ticket["npci_tool_results"]) == 2
+
+
+def test_9_custom_ledger_test_cases_flag_and_whitelist():
+    # 1. `reyshastri-8@oksbi` -> MUST BE FLAGGED AS FRAUD
+    r1 = client.post(
+        "/predict",
+        json={
+            "user_id": "dhawal@okicici",
+            "receiver": "reyshastri-8@oksbi",
+            "amount": 1500.0,
+            "time": 14,
+            "fast_action": False,
+        },
+    )
+    assert r1.status_code == 200
+    d1 = r1.json()
+    assert d1["status"] == "FRAUD"
+    assert d1["risk"] >= 0.95
+    assert d1["decision_action"] == "BLOCK_SCAM"
+
+    # 2. `sayasha36@oksbi` -> MUST BE FLAGGED AS FRAUD
+    r2 = client.post(
+        "/predict",
+        json={
+            "user_id": "dhawal@okicici",
+            "receiver": "sayasha36@oksbi",
+            "amount": 500.0,
+            "time": 12,
+            "fast_action": False,
+        },
+    )
+    assert r2.status_code == 200
+    d2 = r2.json()
+    assert d2["status"] == "FRAUD"
+    assert d2["risk"] >= 0.95
+    assert d2["decision_action"] == "BLOCK_SCAM"
+
+    # 3. `8890032239@ptsbi` -> MUST NOT BE FLAGGED (ALWAYS SAFE, even with high amount / late night / fast action)
+    r3 = client.post(
+        "/predict",
+        json={
+            "user_id": "new_user@okaxis",
+            "receiver": "8890032239@ptsbi",
+            "amount": 25000.0,
+            "time": 2,
+            "fast_action": True,
+        },
+    )
+    assert r3.status_code == 200
+    d3 = r3.json()
+    assert d3["status"] == "SAFE"
+    assert d3["risk"] < 0.10
+    assert d3["decision_action"] == "ALLOW_PAYMENT"
