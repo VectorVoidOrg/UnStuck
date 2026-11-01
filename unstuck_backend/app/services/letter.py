@@ -102,10 +102,6 @@ def generate_letter(
     # 2. Try Gemini polishing if key is provided
     if settings.GEMINI_API_KEY:
         try:
-            import google.generativeai as genai
-            genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = genai.GenerativeModel(settings.MODEL_NAME)
-            
             prompt = (
                 "You are an expert legal grievance editor in India. "
                 "Polish the tone of the following bank grievance letter to be crisp, authoritative, and polite.\n\n"
@@ -114,8 +110,18 @@ def generate_letter(
                 f"Keep reference '{tx.reference}', amount '{amt:,.2f}', dates, and compensation numbers EXACTLY as written.\n\n"
                 f"Letter to polish:\n{plain_letter}"
             )
-            response = model.generate_content(prompt)
-            polished_text = response.text.strip()
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=settings.GEMINI_API_KEY)
+                model = genai.GenerativeModel(settings.MODEL_NAME)
+                response = model.generate_content(prompt)
+                polished_text = response.text.strip()
+            except ImportError:
+                import httpx
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{settings.MODEL_NAME}:generateContent?key={settings.GEMINI_API_KEY}"
+                r = httpx.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=10.0)
+                r.raise_for_status()
+                polished_text = r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
             
             # 3. Run figure validator
             validator_data = {

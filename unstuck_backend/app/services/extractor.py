@@ -176,9 +176,6 @@ def extract_fields(ocr_text: str, sms_text: Optional[str] = None) -> Dict[str, A
     # If Gemini API key is available, call Gemini
     if settings.GEMINI_API_KEY:
         try:
-            import google.generativeai as genai
-            genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = genai.GenerativeModel(settings.MODEL_NAME)
             prompt = (
                 "You are an expert Indian banking and payment assistant. Analyze this payment failure text "
                 "(from OCR screenshot and/or SMS) and extract the exact details into JSON format.\n"
@@ -193,8 +190,18 @@ def extract_fields(ocr_text: str, sms_text: Optional[str] = None) -> Dict[str, A
                 f"SMS Text:\n{sms_text or 'None'}\n\n"
                 "Output ONLY a valid JSON object."
             )
-            resp = model.generate_content(prompt)
-            raw_out = resp.text.strip()
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=settings.GEMINI_API_KEY)
+                model = genai.GenerativeModel(settings.MODEL_NAME)
+                resp = model.generate_content(prompt)
+                raw_out = resp.text.strip()
+            except ImportError:
+                import httpx
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{settings.MODEL_NAME}:generateContent?key={settings.GEMINI_API_KEY}"
+                r = httpx.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=10.0)
+                r.raise_for_status()
+                raw_out = r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
             # Clean markdown codeblocks
             raw_out = re.sub(r'^```json\s*', '', raw_out)
             raw_out = re.sub(r'\s*```$', '', raw_out)

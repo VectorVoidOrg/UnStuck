@@ -42,5 +42,7 @@ class Settings:
     DEFAULT_COMPENSATION_RATE_PER_DAY: float = 100.0
 
 settings = Settings()
-settings.STORAGE_DIR.mkdir(parents=True, exist_ok=True)
-
+try:
+    settings.STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass

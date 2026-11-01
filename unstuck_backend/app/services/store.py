@@ -9,18 +9,23 @@ class DataStore:
     def __init__(self, storage_dir: Optional[Path] = None):
         self.lock = threading.Lock()
         self.storage_dir = storage_dir or settings.STORAGE_DIR
-        self.storage_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            self.storage_dir.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
         self.cases_file = self.storage_dir / "cases.json"
         self.events_file = self.storage_dir / "events.json"
+        self.tmp_cases_file = Path("/tmp/unstuck_cases.json")
         
         self._cases: Dict[str, Case] = {}
         self._load_from_disk()
 
     def _load_from_disk(self):
         with self.lock:
-            if self.cases_file.exists():
+            target_file = self.tmp_cases_file if self.tmp_cases_file.exists() else self.cases_file
+            if target_file.exists():
                 try:
-                    with open(self.cases_file, "r", encoding="utf-8") as f:
+                    with open(target_file, "r", encoding="utf-8") as f:
                         data = json.load(f)
                         for item in data:
                             case_obj = Case.model_validate(item)
@@ -29,12 +34,17 @@ class DataStore:
                     print(f"Warning: Failed loading cases from disk: {e}")
 
     def _save_to_disk(self):
+        dumped = [c.model_dump(mode="json") for c in self._cases.values()]
         try:
             with open(self.cases_file, "w", encoding="utf-8") as f:
-                dumped = [c.model_dump(mode="json") for c in self._cases.values()]
                 json.dump(dumped, f, indent=2, default=str)
-        except Exception as e:
-            print(f"Warning: Failed saving cases to disk: {e}")
+        except Exception:
+            try:
+                self.tmp_cases_file.parent.mkdir(parents=True, exist_ok=True)
+                with open(self.tmp_cases_file, "w", encoding="utf-8") as f:
+                    json.dump(dumped, f, indent=2, default=str)
+            except Exception as e:
+                print(f"Warning: Failed saving cases to disk: {e}")
 
     def save_case(self, case: Case) -> Case:
         with self.lock:
@@ -103,4 +113,3 @@ class DataStore:
 
 # Global store singleton
 store = DataStore()
-

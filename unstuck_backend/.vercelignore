@@ -1,0 +1,10 @@
+.git
+.idea
+__pycache__
+*.pyc
+.venv
+venv
+.vercel
+.pytest_cache
+tests
+sample_data

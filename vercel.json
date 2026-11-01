@@ -5,7 +5,7 @@
       "src": "api/index.py",
       "use": "@vercel/python",
       "config": {
-        "excludeFiles": "{frontend/**,_uv/**,docs/**,.idea/**,.git/**,.vercel/**,.pytest_cache/**,backend/fraud_model.pkl,backend/data/*.csv,backend/data/*.jsonl,backend/scripts/**,backend/tests/**}"
+        "excludeFiles": "{frontend/**,unstuck_backend/**,_uv/**,docs/**,.idea/**,.git/**,.vercel/**,.pytest_cache/**,backend/fraud_model.pkl,backend/data/*.csv,backend/data/*.jsonl,backend/scripts/**,backend/tests/**}"
       }
     }
   ],
