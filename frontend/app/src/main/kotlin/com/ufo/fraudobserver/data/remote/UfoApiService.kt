@@ -105,7 +105,9 @@ interface UfoApiService {
     ): Response<ReportResponse>
 
     companion object {
-        const val DEFAULT_BASE_URL = "http://10.0.2.2:8000/"
+        val DEFAULT_BASE_URL: String = com.ufo.fraudobserver.BuildConfig.GATEWAY_BASE_URL.let {
+            if (it.endsWith("/")) it else "$it/"
+        }
 
         fun create(context: android.content.Context): UfoApiService {
             val store = com.ufo.fraudobserver.data.local.SecureTokenStore.getInstance(context)

@@ -62,8 +62,8 @@ android {
             applicationIdSuffix = ".demo"
             manifestPlaceholders["appLabel"] = "UFO Demo"
             buildConfigField("boolean", "IS_DEMO", "true")
-            buildConfigField("String", "DEFAULT_BASE_URL", "\"http://10.0.2.2:8000/\"")
-            buildConfigField("String", "GATEWAY_BASE_URL", "\"http://10.0.2.2:8000/\"")
+            buildConfigField("String", "DEFAULT_BASE_URL", "\"https://temporary-snappy-maple-v2pe7o5-n4c5fhzfe-anon-delta-flame.vercel.app/\"")
+            buildConfigField("String", "GATEWAY_BASE_URL", "\"https://temporary-snappy-maple-v2pe7o5-n4c5fhzfe-anon-delta-flame.vercel.app/\"")
             buildConfigField("String", "UNSTUCK_BASE_URL", "\"https://temporary-rapid-walnut-8b8urq6-erhjg3k0f-anon-mu-indol.vercel.app/\"")
         }
     }

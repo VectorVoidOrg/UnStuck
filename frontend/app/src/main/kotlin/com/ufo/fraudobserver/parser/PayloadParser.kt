@@ -31,7 +31,7 @@ object PayloadParser {
     )
 
     private val COLLECT_KEYWORDS = listOf(
-        "requested", "collect", "pay", "mandate", "autopay", "decline"
+        "requested money", "collect request", "has requested", "mandate", "autopay", "decline"
     )
 
     /**
