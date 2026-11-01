@@ -1,0 +1,34 @@
+"""
+Backward-compatible database module re-exporting UFO's unified MongoDB / Local-Persistent engine.
+"""
+from app.db.mongo import (
+    db,
+    get_db_status,
+    user_collection,
+    receiver_collection,
+    hall_collection,
+    transactions_collection,
+    investigations_collection,
+    pii_vault_collection,
+    hitl_dlq_collection,
+    audit_logs_collection,
+    ledger_collection,
+    semantic_cache_collection,
+    rbi_guidelines_collection,
+)
+
+__all__ = [
+    "db",
+    "get_db_status",
+    "user_collection",
+    "receiver_collection",
+    "hall_collection",
+    "transactions_collection",
+    "investigations_collection",
+    "pii_vault_collection",
+    "hitl_dlq_collection",
+    "audit_logs_collection",
+    "ledger_collection",
+    "semantic_cache_collection",
+    "rbi_guidelines_collection",
+]

@@ -1,0 +1,25 @@
+{
+  "version": "4.0.0",
+  "target_slm_traffic_share": 0.8,
+  "target_frontier_rag_traffic_share": 0.2,
+  "frontier_threshold": 0.55,
+  "high_amount_threshold_inr": 5000.0,
+  "complex_keywords": [
+    "dispute",
+    "chargeback",
+    "ombudsman",
+    "rbi",
+    "circular",
+    "unauthorized",
+    "lien",
+    "reversal",
+    "utr",
+    "screenshot",
+    "receipt",
+    "extortion",
+    "court",
+    "police",
+    "hacked",
+    "sim swap"
+  ]
+}
