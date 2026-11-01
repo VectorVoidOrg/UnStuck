@@ -8,7 +8,6 @@ _uv
 .vercel
 frontend
 unstuck_backend
-docs
 backend/fraud_model.pkl
 backend/data/upi_fraud_training_data.csv
 backend/data/ufo_slm_finetune_dataset.jsonl
