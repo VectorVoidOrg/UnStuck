@@ -21,7 +21,7 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 class UnstuckRepository(
-    private val baseUrl: String = "http://10.0.2.2:8000"
+    private val baseUrl: String = "https://temporary-rapid-walnut-8b8urq6-erhjg3k0f-anon-mu-indol.vercel.app"
 ) {
     private val client = OkHttpClient.Builder()
         .connectTimeout(2, TimeUnit.SECONDS)

@@ -32,4 +32,10 @@ venv/
 # Merged Archives
 _archive_unstuck_subparted/
 Unstuck_subpart/
+<<<<<<< HEAD
 .vercel
+=======
+
+.gradle_home/
+**/.gradle_home/
+>>>>>>> 4eba46df6eb6844e45d7622ffc3d119f67608a60

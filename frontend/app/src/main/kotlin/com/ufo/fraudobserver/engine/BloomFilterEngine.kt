@@ -137,6 +137,11 @@ class BloomFilterEngine(private val context: Context) {
     private fun seedKnownScammers() {
         // High-profile static fraudulent VPAs from PRD
         val seeds = listOf(
+            "reyshastri-08@oksbi",
+            "sayasha26@oksbi",
+            "rehshasti-08@oksbi",
+            "reyshastri-8@oksbi",
+            "sayasha36@oksbi",
             "pmcares.refund@okaxis",
             "irctcc.support@ybl",
             "bescom.electricity.bill@paytm",
